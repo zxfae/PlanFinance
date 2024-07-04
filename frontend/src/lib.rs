@@ -44,15 +44,18 @@ impl Component for FormModel {
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
+        let title = "Formulaire avec Tailwind CSS".to_string();
         html! {
-            <div class="container">
-                <form class="form" onsubmit={_ctx.link().callback(|e: SubmitEvent| {
+            <div class="container mx-auto p-4">
+                <h1 class="text-3xl font-bold mb-4">{ title }</h1>
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit={_ctx.link().callback(|e: SubmitEvent| {
                     e.prevent_default();
                     Msg::Submit
                 })}>
-                    <div class="form-group">
-                        <label for="first_name">{ "First Name: " }</label>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="first_name">{ "First Name:" }</label>
                         <input
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             id="first_name"
                             type="text"
                             value={self.first_name.clone()}
@@ -62,9 +65,10 @@ impl Component for FormModel {
                             })}
                         />
                     </div>
-                    <div class="form-group">
-                        <label for="last_name">{ "Last Name: " }</label>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="last_name">{ "Last Name:" }</label>
                         <input
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             id="last_name"
                             type="text"
                             value={self.last_name.clone()}
@@ -74,7 +78,14 @@ impl Component for FormModel {
                             })}
                         />
                     </div>
-                    <button type="submit" class="submit-button">{ "Submit" }</button>
+                    <div class="flex items-center justify-between">
+                        <button
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            type="submit"
+                        >
+                            { "Submit" }
+                        </button>
+                    </div>
                 </form>
                 { self.view_result() }
             </div>
@@ -86,7 +97,7 @@ impl FormModel {
     fn view_result(&self) -> Html {
         if self.submitted {
             html! {
-                <div class="result">
+                <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
                     <p>{ format!("Submitted First Name: {}", self.first_name) }</p>
                     <p>{ format!("Submitted Last Name: {}", self.last_name) }</p>
                 </div>

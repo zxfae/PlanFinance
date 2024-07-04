@@ -45,9 +45,10 @@ impl Component for FormModel {
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <>
-                { Self::header() }
-                <div class="container mx-auto p-4">
+        <div class="flex flex-col min-h-screen">
+            { Self::header() }
+            <div class="flex flex-grow justify-center items-center">
+                <div class="w-full max-w-md">
                     <form class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={_ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
                         Msg::Submit
@@ -89,10 +90,12 @@ impl Component for FormModel {
                     </form>
                     { self.view_result() }
                 </div>
-                { Self::footer() }
-            </>
-        }
+            </div>
+            { Self::footer() }
+        </div>
     }
+    }
+
 }
 
 impl FormModel {
@@ -115,7 +118,7 @@ impl FormModel {
     fn view_result(&self) -> Html {
         if self.submitted {
             html! {
-                <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded w-full">
                     <p>{ format!("Submitted First Name: {}", self.first_name) }</p>
                     <p>{ format!("Submitted Last Name: {}", self.last_name) }</p>
                 </div>

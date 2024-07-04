@@ -1,3 +1,4 @@
+use std::time::Duration;
 use actix_files as fs;
 use actix_web::{get, App, HttpServer, HttpResponse, Result};
 use reqwest;
@@ -28,6 +29,8 @@ async fn main() -> std::io::Result<()> {
             .service(fs::Files::new("/static", "./frontend/static").show_files_listing())
     })
         .bind(("127.0.0.1", 8000))?
+        //Performance and ressource management
+        .keep_alive(Duration::from_secs(75))
         .run()
         .await
 }

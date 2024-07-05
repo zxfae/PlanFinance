@@ -62,38 +62,35 @@ func InitMainDb() {
 	}
 	log.Println("Database initialized, test user and test post inserted successfully")
 }
-
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	rows, err := Db.Query("SELECT * FROM Users")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Missing user ID", http.StatusBadRequest)
 		return
 	}
-	defer rows.Close()
 
-	var users []User
-	for rows.Next() {
-		var user User
-		err = rows.Scan(&user.ID, &user.Lastname, &user.Firstname)
-		if err != nil {
+	var user User
+	err := Db.QueryRow("SELECT * FROM Users WHERE id = ?", id).Scan(&user.ID, &user.Lastname, &user.Firstname)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
-		users = append(users, user)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(user)
 }
-func AddUser(w http.ResponseWriter, r *http.Request) {
+
+func AddUsers(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	fmt.Printf("Received user: %+v\n", user)
 
 	stmt, err := Db.Prepare("INSERT INTO Users(lastname, firstname) VALUES(?, ?)")
 	if err != nil {

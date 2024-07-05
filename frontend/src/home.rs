@@ -1,9 +1,8 @@
-// form_model.rs
 use yew::prelude::*;
 use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlInputElement;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::AppRoute;
 use crate::header;
@@ -19,11 +18,12 @@ pub enum Msg {
     UpdateLastName(String),
     UpdateFirstName(String),
     Submit,
-    SubmissionComplete,
+    SubmissionComplete(User),
 }
 
-#[derive(Serialize)]
-struct NewUser {
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+struct User {
+    id: i32,
     lastname: String,
     firstname: String,
 }
@@ -52,19 +52,27 @@ impl Component for FormModel {
             }
             Msg::Submit => {
                 if !self.submitted {
-                    let user = NewUser {
+                    let user = User {
+                        id: 0,
                         lastname: self.last_name.clone(),
                         firstname: self.first_name.clone(),
                     };
                     let user_json = serde_json::to_string(&user).unwrap();
                     log::info!("Submitting user: {}", user_json);
                     ctx.link().send_future(async {
-                        let _ = Request::post("http://localhost:8080/add_user")
+                        let response = Request::post("http://localhost:8080/add_user")
                             .header("Content-Type", "application/json")
                             .body(user_json)
                             .send()
-                            .await;
-                        Msg::SubmissionComplete
+                            .await
+                            .unwrap();
+
+                        if response.ok() {
+                            let new_user: User = response.json().await.unwrap();
+                            Msg::SubmissionComplete(new_user)
+                        } else {
+                            Msg::Submit
+                        }
                     });
                     self.submitted = true;
                     true
@@ -72,8 +80,15 @@ impl Component for FormModel {
                     false
                 }
             }
-            Msg::SubmissionComplete => {
+            Msg::SubmissionComplete(new_user) => {
                 log::info!("Submission completed.");
+                web_sys::window()
+                    .unwrap()
+                    .local_storage()
+                    .unwrap()
+                    .unwrap()
+                    .set_item("user_id", &new_user.id.to_string())
+                    .unwrap();
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::Success);
                 true
@@ -110,6 +125,7 @@ impl Component for FormModel {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateLastName(input.value())
                                 })}
+                            required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -124,6 +140,7 @@ impl Component for FormModel {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateFirstName(input.value())
                                 })}
+                            required=true
                             />
                         </div>
 
@@ -137,7 +154,6 @@ impl Component for FormModel {
                             </button>
                         </div>
                     </form>
-                    { self.view_result() }
                 </div>
             </div>
             { footer() }
@@ -153,19 +169,6 @@ impl FormModel {
             <div class="text-center text-grey-600 text-xl font-semibold mb-4">
                 <h1>{title}</h1>
             </div>
-        }
-    }
-
-    fn view_result(&self) -> Html {
-        if self.submitted {
-            html! {
-                <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded w-full">
-                    <p>{ format!("Submitted Last Name: {}", self.last_name) }</p>
-                    <p>{ format!("Submitted First Name: {}", self.first_name) }</p>
-                </div>
-            }
-        } else {
-            html! { <div></div> }
         }
     }
 }

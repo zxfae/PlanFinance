@@ -1,6 +1,5 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use wasm_bindgen::prelude::*;
 use web_sys::HtmlInputElement;
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
@@ -22,7 +21,7 @@ pub enum Msg {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-struct User {
+pub struct User {
     id: i32,
     lastname: String,
     firstname: String,

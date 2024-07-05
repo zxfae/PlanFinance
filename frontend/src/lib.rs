@@ -30,7 +30,7 @@ fn header() -> Html {
             </svg>
         </a>
     </header>
-}
+    }
 }
 
 // Function to render the footer

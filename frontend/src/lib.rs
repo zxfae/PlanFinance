@@ -1,6 +1,5 @@
-
-
 use yew::prelude::*;
+use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlInputElement;
 use serde::Serialize;
@@ -25,10 +24,17 @@ struct NewUser {
     firstname: String,
 }
 
+#[derive(Routable, PartialEq, Clone, Debug)]
+enum AppRoute {
+    #[at("/")]
+    Home,
+    #[at("/success")]
+    Success,
+}
+
 impl Component for FormModel {
     type Message = Msg;
     type Properties = ();
-
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
             last_name: String::new(),
@@ -36,14 +42,13 @@ impl Component for FormModel {
             submitted: false,
         }
     }
-
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::UpdateFirstName(value) => {
+            Msg::UpdateLastName(value) => {
                 self.last_name = value;
                 true
             }
-            Msg::UpdateLastName(value) => {
+            Msg::UpdateFirstName(value) => {
                 self.first_name = value;
                 true
             }
@@ -54,7 +59,7 @@ impl Component for FormModel {
                         firstname: self.first_name.clone(),
                     };
                     let user_json = serde_json::to_string(&user).unwrap();
-                    log::info!("Submitting user: {}", user_json); // Log for debugging
+                    log::info!("Submitting user: {}", user_json);
                     ctx.link().send_future(async {
                         let _ = Request::post("http://localhost:8080/add_user")
                             .header("Content-Type", "application/json")
@@ -71,6 +76,8 @@ impl Component for FormModel {
             }
             Msg::SubmissionComplete => {
                 log::info!("Submission completed.");
+                let navigator = ctx.link().navigator().unwrap();
+                navigator.push(&AppRoute::Success);
                 true
             }
         }
@@ -80,6 +87,7 @@ impl Component for FormModel {
         html! {
             <div class="flex flex-col min-h-screen">
                 { self.header() }
+                { self.test() }
                 <div class="flex flex-grow justify-center items-center">
                     <div class="w-full max-w-md">
                         <form class="bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
@@ -87,30 +95,30 @@ impl Component for FormModel {
                             Msg::Submit
                         })}>
                             <div class="mb-4">
-                                <label class="block text-gray-700 text-sm font-semibold mb-2" for="first_name">{ "Nom" }</label>
+                                <label class="block text-gray-700 text-sm font-semibold mb-2" for="last_name">{ "Nom" }</label>
                                 <input
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                    id="first_name"
+                                    id="last_name"
                                     type="text"
                                     placeholder="Entrez votre nom"
                                     value={self.last_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateFirstName(input.value())
+                                        Msg::UpdateLastName(input.value())
                                     })}
                                 />
                             </div>
                             <div class="mb-6">
-                                <label class="block text-gray-700 text-sm font-semibold mb-2" for="last_name">{ "Prénom" }</label>
+                                <label class="block text-gray-700 text-sm font-semibold mb-2" for="first_name">{ "Prénom" }</label>
                                 <input
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                    id="last_name"
+                                    id="first_name"
                                     type="text"
-                                    placeholder="Entrez votre Prénom"
+                                    placeholder="Entrez votre prénom"
                                     value={self.first_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateLastName(input.value())
+                                        Msg::UpdateFirstName(input.value())
                                     })}
                                 />
                             </div>
@@ -151,6 +159,12 @@ impl FormModel {
         }
     }
 
+    fn test(&self) -> Html{
+        html!{
+            <h1>{"Hello"}</h1>
+        }
+    }
+
     fn view_result(&self) -> Html {
         if self.submitted {
             html! {
@@ -174,7 +188,33 @@ impl FormModel {
     }
 }
 
+#[function_component(Success)]
+fn success() -> Html {
+    html! {
+        <div class="flex flex-col min-h-screen justify-center items-center">
+            <h1 class="text-3xl font-serif text-gray-900 mb-4">{ "Submission Successful!" }</h1>
+            <p>{ "Your data has been successfully submitted." }</p>
+            <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                { "Go Back" }
+            </a>
+        </div>
+    }
+}
+#[function_component(App)]
+fn app() -> Html {
+    html! {
+        <BrowserRouter>
+            <Switch<AppRoute> render={switch} />
+        </BrowserRouter>
+    }
+}
+fn switch(routes: AppRoute) -> Html {
+    match routes {
+        AppRoute::Home => html! { <FormModel /> },
+        AppRoute::Success => html! { <Success /> },
+    }
+}
 #[wasm_bindgen(start)]
 pub fn run_app() {
-    yew::Renderer::<FormModel>::new().render();
+    yew::Renderer::<App>::new().render();
 }

@@ -14,7 +14,6 @@ async fn get_users() -> Result<HttpResponse> {
     let response = reqwest::get("http://localhost:8080/users")
         .await
         .expect("Failed to send request");
-
     let body = response.text().await.expect("Failed to read response body");
     Ok(HttpResponse::Ok().body(body))
 }

@@ -10,6 +10,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var Db *sql.DB
+
+type User struct {
+	ID        int    `json:"id"`
+	Lastname  string `json:"lastname"`
+	Firstname string `json:"firstname"`
+}
+
 func InitDB() (*sql.DB, error) {
 	dbFilePath := "./entrepreunariat.db"
 
@@ -18,7 +26,6 @@ func InitDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Configure database connection settings
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
 	db.SetConnMaxLifetime(0)
@@ -57,29 +64,80 @@ func InitMainDb() {
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
-	rows, err := Db.Query("SELECT * FROM users")
+	rows, err := Db.Query("SELECT * FROM Users")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var users []string
+	var users []User
 	for rows.Next() {
-		var username string
-		err = rows.Scan(&username)
+		var user User
+		err = rows.Scan(&user.ID, &user.Lastname, &user.Firstname)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		users = append(users, username)
+		users = append(users, user)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
+}
+func addUser(w http.ResponseWriter, r *http.Request) {
+	var user User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("Received user: %+v\n", user)
+
+	stmt, err := Db.Prepare("INSERT INTO Users(lastname, firstname) VALUES(?, ?)")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(user.Lastname, user.Firstname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user.ID = int(id)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
+func addCorsHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func main() {
 	InitMainDb()
-	http.HandleFunc("/users", getUsers)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/users", getUsers)
+	mux.HandleFunc("/add_user", addUser)
+
+	log.Fatal(http.ListenAndServe(":8080", addCorsHeaders(mux)))
 }

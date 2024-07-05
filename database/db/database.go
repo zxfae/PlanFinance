@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -19,7 +19,7 @@ type User struct {
 }
 
 func InitDB() (*sql.DB, error) {
-	dbFilePath := "./entrepreunariat.db"
+	dbFilePath := "./db/entrepreunariat.db"
 
 	db, err := sql.Open("sqlite3", dbFilePath)
 	if err != nil {
@@ -63,7 +63,7 @@ func InitMainDb() {
 	log.Println("Database initialized, test user and test post inserted successfully")
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func GetUsers(w http.ResponseWriter, r *http.Request) {
 	rows, err := Db.Query("SELECT * FROM Users")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
-func addUser(w http.ResponseWriter, r *http.Request) {
+func AddUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -117,27 +117,4 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 	user.ID = int(id)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
-}
-
-func addCorsHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func main() {
-	InitMainDb()
-	mux := http.NewServeMux()
-	mux.HandleFunc("/users", getUsers)
-	mux.HandleFunc("/add_user", addUser)
-
-	log.Fatal(http.ListenAndServe(":8080", addCorsHeaders(mux)))
 }

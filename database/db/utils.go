@@ -1,5 +1,3 @@
-package main
-
+package db
 
 const DbFilePathEnv = ""
-

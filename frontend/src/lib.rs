@@ -5,22 +5,22 @@ use serde::Serialize;
 use reqwasm::http::Request;
 
 struct FormModel {
-    first_name: String,
     last_name: String,
+    first_name: String,
     submitted: bool,
 }
 
 enum Msg {
-    UpdateFirstName(String),
     UpdateLastName(String),
+    UpdateFirstName(String),
     Submit,
     SubmissionComplete,
 }
 
 #[derive(Serialize)]
 struct NewUser {
-    firstname: String,
     lastname: String,
+    firstname: String,
 }
 
 impl Component for FormModel {
@@ -29,8 +29,8 @@ impl Component for FormModel {
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            first_name: String::new(),
             last_name: String::new(),
+            first_name: String::new(),
             submitted: false,
         }
     }
@@ -38,18 +38,18 @@ impl Component for FormModel {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::UpdateFirstName(value) => {
-                self.first_name = value;
+                self.last_name = value;
                 true
             }
             Msg::UpdateLastName(value) => {
-                self.last_name = value;
+                self.first_name = value;
                 true
             }
             Msg::Submit => {
                 if !self.submitted {
                     let user = NewUser {
-                        firstname: self.first_name.clone(),
                         lastname: self.last_name.clone(),
+                        firstname: self.first_name.clone(),
                     };
                     let user_json = serde_json::to_string(&user).unwrap();
                     log::info!("Submitting user: {}", user_json); // Log for debugging
@@ -91,7 +91,7 @@ impl Component for FormModel {
                                     id="first_name"
                                     type="text"
                                     placeholder="Entrez votre nom"
-                                    value={self.first_name.clone()}
+                                    value={self.last_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         Msg::UpdateFirstName(input.value())
@@ -105,7 +105,7 @@ impl Component for FormModel {
                                     id="last_name"
                                     type="text"
                                     placeholder="Entrez votre Prénom"
-                                    value={self.last_name.clone()}
+                                    value={self.first_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         Msg::UpdateLastName(input.value())
@@ -153,8 +153,8 @@ impl FormModel {
         if self.submitted {
             html! {
                 <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded w-full">
-                    <p>{ format!("Submitted First Name: {}", self.first_name) }</p>
                     <p>{ format!("Submitted Last Name: {}", self.last_name) }</p>
+                    <p>{ format!("Submitted First Name: {}", self.first_name) }</p>
                 </div>
             }
         } else {

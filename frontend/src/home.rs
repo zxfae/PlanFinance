@@ -3,9 +3,7 @@ use yew_router::prelude::*;
 use web_sys::HtmlInputElement;
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
-use crate::AppRoute;
-use crate::header;
-use crate::footer;
+use crate::{AppRoute, header, footer};
 
 pub struct FormModel {
     last_name: String,
@@ -26,7 +24,6 @@ pub struct User {
     lastname: String,
     firstname: String,
 }
-
 impl Component for FormModel {
     type Message = Msg;
     type Properties = ();
@@ -89,7 +86,8 @@ impl Component for FormModel {
                     .set_item("user_id", &new_user.id.to_string())
                     .unwrap();
                 let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&AppRoute::Success);
+                // Navigate to FormEntreprise route
+                navigator.push(&AppRoute::FormEntreprise);
                 true
             }
         }

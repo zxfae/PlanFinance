@@ -12,6 +12,7 @@ func LoadServer() {
 	router := http.NewServeMux()
 	router.HandleFunc("/get_user", db.GetUsers)
 	router.HandleFunc("/add_user", db.AddUsers)
+	router.HandleFunc("/add_ent", db.AddEntreprise)
 
 	corsRouter := AddCorsHeaders(router)
 	serverConfig := ServerParameters(corsRouter)

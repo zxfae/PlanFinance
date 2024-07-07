@@ -596,6 +596,10 @@ video {
   visibility: collapse;
 }
 
+.static {
+  position: static;
+}
+
 .absolute {
   position: absolute;
 }
@@ -610,6 +614,10 @@ video {
 
 .m-2 {
   margin: 0.5rem;
+}
+
+.m-4 {
+  margin: 1rem;
 }
 
 .mx-8 {

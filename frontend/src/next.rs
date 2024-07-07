@@ -1,11 +1,11 @@
 use yew::prelude::*;
+use yew_router::prelude::*;
+use web_sys::HtmlInputElement;
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
-
-use crate::header;
-use crate::footer;
+use crate::{AppRoute, header, footer};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 struct User {
@@ -14,102 +14,233 @@ struct User {
     firstname: String,
 }
 
-#[function_component(Success)]
-pub fn success() -> Html {
-    let user = use_state(|| None);
-    let error = use_state(|| None);
-    let has_fetched = use_state(|| false);
+// New form
+pub struct FormEntreprise {
+    name: String,
+    date: String,
+    codeape: String,
+    status: String,
+    submitted: bool,
+}
 
-    {
-        let user = user.clone();
-        let error = error.clone();
-        let has_fetched = has_fetched.clone();
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Entreprise {
+    id: i32,
+    name: String,
+    date: String,
+    codeape: String,
+    status: String,
+}
 
-        use_effect(move || {
-            if !*has_fetched {
-                let user = user.clone();
-                let error = error.clone();
-                spawn_local(async move {
-                    let user_id_opt = web_sys::window()
-                        .unwrap()
-                        .local_storage()
-                        .unwrap()
-                        .unwrap()
-                        .get_item("user_id")
-                        .unwrap();
+pub enum Msg {
+    UpdateName(String),
+    UpdateDate(String),
+    UpdateCodeApe(String),
+    UpdateStatus(String),
+    Submit,
+    SubmissionComplete(Entreprise),
+}
 
-                    if let Some(user_id) = user_id_opt {
-                        console::log_1(&format!("User ID found: {}", user_id).into());
+impl Component for FormEntreprise {
+    type Message = Msg;
+    type Properties = ();
 
-                        let cached_user_opt = web_sys::window()
-                            .unwrap()
-                            .local_storage()
-                            .unwrap()
-                            .unwrap()
-                            .get_item(&format!("user_{}", user_id))
-                            .unwrap();
-
-                        if let Some(cached_user) = cached_user_opt {
-                            let fetched_user: User = serde_json::from_str(&cached_user).unwrap();
-                            user.set(Some(fetched_user));
-                        } else {
-                            let url = format!("http://localhost:8080/get_user?id={}", user_id);
-                            match Request::get(&url).send().await {
-                                Ok(response) => {
-                                    match response.json::<User>().await {
-                                        Ok(fetched_user) => {
-                                            web_sys::window()
-                                                .unwrap()
-                                                .local_storage()
-                                                .unwrap()
-                                                .unwrap()
-                                                .set_item(&format!("user_{}", user_id), &serde_json::to_string(&fetched_user).unwrap())
-                                                .unwrap();
-                                            user.set(Some(fetched_user));
-                                        },
-                                        Err(err) => {
-                                            console::error_1(&format!("Failed to parse JSON: {:?}", err).into());
-                                            error.set(Some(format!("Failed to parse JSON: {:?}", err)));
-                                        }
-                                    }
-                                },
-                                Err(err) => {
-                                    console::error_1(&format!("Failed to fetch: {:?}", err).into());
-                                    error.set(Some(format!("Failed to fetch: {:?}", err)));
-                                }
-                            }
-                        }
-                    } else {
-                        error.set(Some("User ID not found in local storage".into()));
-                    }
-                });
-                has_fetched.set(true);
-            }
-            || ()
-        });
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self {
+            name: String::new(),
+            date: String::new(),
+            codeape: String::new(),
+            status: String::new(),
+            submitted: false,
+        }
     }
 
-    html! {
-        <div class="flex flex-col min-h-screen justify-center items-center">
-            { header() }
-            <div class="flex flex-col flex-grow justify-center items-center">
-                {
-                    if let Some(error) = &*error {
-                        html! { <p class="text-red-500">{ format!("Error: {}", error) }</p> }
-                    } else if let Some(user) = &*user {
-                        html! {
-                            <p  class="text-3xl font-serif text-gray-900 mb-4">{ format!("Bienvenue {} {}", user.lastname, user.firstname) }</p>
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::UpdateName(value) => {
+                self.name = value;
+                true
+            }
+            Msg::UpdateDate(value) => {
+                self.date = value;
+                true
+            }
+            Msg::UpdateCodeApe(value) => {
+                self.codeape = value;
+                true
+            }
+            Msg::UpdateStatus(value) => {
+                self.status = value;
+                true
+            }
+            Msg::Submit => {
+                if !self.submitted {
+                    let entreprise = Entreprise {
+                        id: 0,
+                        name: self.name.clone(),
+                        date: self.date.clone(),
+                        codeape: self.codeape.clone(),
+                        status: self.status.clone(),
+                    };
+                    let entreprise_json = serde_json::to_string(&entreprise).unwrap();
+                    log::info!("Submitting entreprise: {}", entreprise_json);
+                    ctx.link().send_future(async {
+                        let response = Request::post("http://localhost:8080/add_ent")
+                            .header("Content-Type", "application/json")
+                            .body(entreprise_json)
+                            .send()
+                            .await
+                            .unwrap();
+
+                        if response.ok() {
+                            let new_ent: Entreprise = response.json().await.unwrap();
+                            Msg::SubmissionComplete(new_ent)
+                        } else {
+                            Msg::Submit
                         }
-                    } else {
-                        html! { <p>{ "Chargement des données utilisateur..." }</p> }
-                    }
+                    });
+                    self.submitted = true;
+                    true
+                } else {
+                    false
                 }
-                <p>{ "Your data has been successfully submitted." }</p>
-                <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    { "Go Back" }
-                </a>
+            }
+            Msg::SubmissionComplete(new_ent) => {
+                log::info!("Submission completed.");
+                web_sys::window()
+                    .unwrap()
+                    .local_storage()
+                    .unwrap()
+                    .unwrap()
+                    .set_item("ent_id", &new_ent.id.to_string())
+                    .unwrap();
+                true
+            }
+        }
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        log::info!("Rendering view. Submitted: {}", self.submitted);
+        if self.submitted {
+            self.success(ctx)
+        } else {
+            html! {
+            <div class="flex flex-col min-h-screen">
+                { header() }
+                <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                    <div class="text-center text-gray-600 text-4xl font-semibold mb-2">
+                        <h1>{ "Proposer, c'est possible !" }</h1>
+                    <div class="text-center text-gray-600 text-2xl font-semibold m-2">
+                        <h1>{"Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement"}</h1>
+                    </div>
+                    </div>
+                    <div class="w-full max-w-md">
+                        <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                            e.prevent_default();
+                            Msg::Submit
+                        })}>
+                            <div class="mb-4">
+                                {self.view_box_title()}
+                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="name">{ "Nom de votre entreprise" }</label>
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                    id="name"
+                                    type="text"
+                                    placeholder="Entrez le nom de votre entreprise"
+                                    value={self.name.clone()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        Msg::UpdateName(input.value())
+                                    })}
+                                required=true
+                                />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="date">{ "Date" }</label>
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                    id="date"
+                                    type="text"
+                                    placeholder="Date potentielle ouverture"
+                                    value={self.date.clone()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        Msg::UpdateDate(input.value())
+                                    })}
+                                required=true
+                                />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="codeape">{ "Code APE" }</label>
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                    id="codeape"
+                                    type="text"
+                                    placeholder="Code APE"
+                                    value={self.codeape.clone()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        Msg::UpdateCodeApe(input.value())
+                                    })}
+                                required=true
+                                />
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="status">{ "Statut" }</label>
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                    id="status"
+                                    type="text"
+                                    placeholder="Statut de votre entreprise"
+                                    value={self.status.clone()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        Msg::UpdateStatus(input.value())
+                                    })}
+                                required=true
+                                />
+                            </div>
+
+                            <div class="flex items-center justify-center">
+                                <button
+                                    class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="submit"
+                                    disabled={self.submitted}
+                                >
+                                    { "SUIVANT" }
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                { footer() }
             </div>
-            { footer() }
-        </div>
+            }
+        }
+    }
+}
+
+impl FormEntreprise {
+    fn view_box_title(&self) -> Html {
+        html! {
+            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+                { "Formulaire d'entreprise" }
+            </div>
+        }
+    }
+
+    fn success(&self, _ctx: &Context<Self>) -> Html {
+        html! {
+            <div class="flex flex-col min-h-screen justify-center items-center">
+                { header() }
+                <div class="flex flex-col flex-grow justify-center items-center">
+                    <p class="text-3xl font-serif text-gray-900 mb-4">{ "Votre projet a été soumis avec succès." }</p>
+                    <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        { "Retour" }
+                    </a>
+                </div>
+                { footer() }
+            </div>
+        }
     }
 }

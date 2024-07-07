@@ -18,6 +18,14 @@ type User struct {
 	Firstname string `json:"firstname"`
 }
 
+type Entreprises struct {
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Date    string `json:"date"`
+	Codeape string `json:"codeape"`
+	Status  string `json:"status"`
+}
+
 func InitDB() (*sql.DB, error) {
 	dbFilePath := "./db/entrepreunariat.db"
 
@@ -51,17 +59,28 @@ func InitMainDb() {
 		fn   func(*sql.DB) error
 	}{
 		{"Users", CreateTableUsers},
+		{"Entreprises", CreateTableEntreprise},
 	}
+
+	var msgOk, msgError string
 
 	for _, tablefunc := range tableCreations {
 		if err := tablefunc.fn(Db); err != nil {
-			fmt.Printf("Error Creating table %s: %s\n", tablefunc.name, err)
+			msgError += fmt.Sprintf("Error Creating table %s: %s\n", tablefunc.name, err)
 		} else {
-			fmt.Printf("Table created %s successfully\n", tablefunc.name)
+			msgOk += fmt.Sprintf("Table created %s successfully\n", tablefunc.name)
 		}
 	}
-	log.Println("Database initialized, test user and test post inserted successfully")
+
+	if msgError != "" {
+		fmt.Println(msgError)
+	}
+
+	if msgOk != "" {
+		fmt.Println(msgOk)
+	}
 }
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {

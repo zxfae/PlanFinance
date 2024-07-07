@@ -36,3 +36,35 @@ func AddUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
+
+func AddEntreprise(w http.ResponseWriter, r *http.Request) {
+	var ent Entreprises
+	err := json.NewDecoder(r.Body).Decode(&ent)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	stmt, err := Db.Prepare("INSERT INTO Entreprises(name, date, codeape, status) VALUES(?, ?, ?, ?)")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(ent.Name, ent.Date, ent.Codeape, ent.Status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ent.ID = int(id)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ent)
+}

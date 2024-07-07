@@ -93,19 +93,18 @@ pub fn success() -> Html {
         <div class="flex flex-col min-h-screen justify-center items-center">
             { header() }
             <div class="flex flex-col flex-grow justify-center items-center">
-                <h1 class="text-3xl font-serif text-gray-900 mb-4">{ "Je simule mon business plan" }</h1>
-                <p>{ "Your data has been successfully submitted." }</p>
                 {
                     if let Some(error) = &*error {
                         html! { <p class="text-red-500">{ format!("Error: {}", error) }</p> }
                     } else if let Some(user) = &*user {
                         html! {
-                            <p>{ format!("Bienvenue {} {}", user.lastname, user.firstname) }</p>
+                            <p  class="text-3xl font-serif text-gray-900 mb-4">{ format!("Bienvenue {} {}", user.lastname, user.firstname) }</p>
                         }
                     } else {
                         html! { <p>{ "Chargement des données utilisateur..." }</p> }
                     }
                 }
+                <p>{ "Your data has been successfully submitted." }</p>
                 <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     { "Go Back" }
                 </a>

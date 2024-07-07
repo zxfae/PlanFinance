@@ -18,46 +18,76 @@ struct User {
 pub fn success() -> Html {
     let user = use_state(|| None);
     let error = use_state(|| None);
-    let user_clone = user.clone();
-    let error_clone = error.clone();
+    let has_fetched = use_state(|| false);
 
-    use_effect(move || {
-        let user_clone = user_clone.clone();
-        let error_clone = error_clone.clone();
-        spawn_local(async move {
-            if let Some(user_id) = web_sys::window()
-                .unwrap()
-                .local_storage()
-                .unwrap()
-                .unwrap()
-                .get_item("user_id")
-                .unwrap()
-            {
-                console::log_1(&format!("User ID found: {}", user_id).into());
-                let url = format!("http://localhost:8080/get_user?id={}", user_id);
-                match Request::get(&url).send().await {
-                    Ok(response) => {
-                        match response.json::<User>().await {
-                            Ok(fetched_user) => {
-                                user_clone.set(Some(fetched_user));
-                            },
-                            Err(err) => {
-                                console::error_1(&format!("Failed to parse JSON: {:?}", err).into());
-                                error_clone.set(Some(format!("Failed to parse JSON: {:?}", err)));
+    {
+        let user = user.clone();
+        let error = error.clone();
+        let has_fetched = has_fetched.clone();
+
+        use_effect(move || {
+            if !*has_fetched {
+                let user = user.clone();
+                let error = error.clone();
+                spawn_local(async move {
+                    let user_id_opt = web_sys::window()
+                        .unwrap()
+                        .local_storage()
+                        .unwrap()
+                        .unwrap()
+                        .get_item("user_id")
+                        .unwrap();
+
+                    if let Some(user_id) = user_id_opt {
+                        console::log_1(&format!("User ID found: {}", user_id).into());
+
+                        let cached_user_opt = web_sys::window()
+                            .unwrap()
+                            .local_storage()
+                            .unwrap()
+                            .unwrap()
+                            .get_item(&format!("user_{}", user_id))
+                            .unwrap();
+
+                        if let Some(cached_user) = cached_user_opt {
+                            let fetched_user: User = serde_json::from_str(&cached_user).unwrap();
+                            user.set(Some(fetched_user));
+                        } else {
+                            let url = format!("http://localhost:8080/get_user?id={}", user_id);
+                            match Request::get(&url).send().await {
+                                Ok(response) => {
+                                    match response.json::<User>().await {
+                                        Ok(fetched_user) => {
+                                            web_sys::window()
+                                                .unwrap()
+                                                .local_storage()
+                                                .unwrap()
+                                                .unwrap()
+                                                .set_item(&format!("user_{}", user_id), &serde_json::to_string(&fetched_user).unwrap())
+                                                .unwrap();
+                                            user.set(Some(fetched_user));
+                                        },
+                                        Err(err) => {
+                                            console::error_1(&format!("Failed to parse JSON: {:?}", err).into());
+                                            error.set(Some(format!("Failed to parse JSON: {:?}", err)));
+                                        }
+                                    }
+                                },
+                                Err(err) => {
+                                    console::error_1(&format!("Failed to fetch: {:?}", err).into());
+                                    error.set(Some(format!("Failed to fetch: {:?}", err)));
+                                }
                             }
                         }
-                    },
-                    Err(err) => {
-                        console::error_1(&format!("Failed to fetch: {:?}", err).into());
-                        error_clone.set(Some(format!("Failed to fetch: {:?}", err)));
+                    } else {
+                        error.set(Some("User ID not found in local storage".into()));
                     }
-                }
-            } else {
-                error_clone.set(Some("User ID not found in local storage".into()));
+                });
+                has_fetched.set(true);
             }
+            || ()
         });
-        || ()
-    });
+    }
 
     html! {
         <div class="flex flex-col min-h-screen justify-center items-center">
@@ -73,7 +103,7 @@ pub fn success() -> Html {
                             <p>{ format!("Bienvenue {} {}", user.lastname, user.firstname) }</p>
                         }
                     } else {
-                        html! { <p>{ "Chargements des donnses utilisateur..." }</p> }
+                        html! { <p>{ "Chargement des données utilisateur..." }</p> }
                     }
                 }
                 <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">

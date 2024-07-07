@@ -23,7 +23,6 @@ async fn success() -> impl Responder {
     let html = std::fs::read_to_string("./frontend/static/index.html").unwrap();
     HttpResponse::Ok()
         .content_type("text/html")
-        .header("Cache-Control", "max-age=3600") // Ajout de l'en-tête de mise en cache
         .body(html)
 }
 

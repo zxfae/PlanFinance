@@ -56,7 +56,6 @@ pub fn success() -> Html {
                 error_clone.set(Some("User ID not found in local storage".into()));
             }
         });
-
         || ()
     });
 

@@ -1,6 +1,6 @@
 use std::time::Duration;
 use actix_files as fs;
-use actix_web::{get, App, HttpServer, HttpResponse, Result};
+use actix_web::{get, App, HttpServer, HttpResponse, Result, Responder};
 use reqwest;
 
 #[get("/")]
@@ -11,11 +11,20 @@ async fn index() -> Result<HttpResponse> {
 
 #[get("/users")]
 async fn get_users() -> Result<HttpResponse> {
-    let response = reqwest::get("http://localhost:8080/users")
+    let response = reqwest::get("http://localhost:8080/get_user")
         .await
         .expect("Failed to send request");
     let body = response.text().await.expect("Failed to read response body");
     Ok(HttpResponse::Ok().body(body))
+}
+
+#[get("/success")]
+async fn success() -> impl Responder {
+    let html = std::fs::read_to_string("./frontend/static/index.html").unwrap();
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .header("Cache-Control", "max-age=3600") // Ajout de l'en-tête de mise en cache
+        .body(html)
 }
 
 #[actix_web::main]
@@ -23,6 +32,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(index)
+            .service(success)
             .service(get_users)
             .service(fs::Files::new("/static/pkg", "./frontend/pkg").show_files_listing())
             .service(fs::Files::new("/static", "./frontend/static").show_files_listing())

@@ -6,30 +6,23 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
 use crate::{AppRoute, header, footer};
-
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-struct User {
+pub struct Entreprise {
     id: i32,
-    lastname: String,
-    firstname: String,
+    user_id: i32,
+    name: String,
+    date: String,
+    codeape: String,
+    status: String,
 }
 
-// New form
 pub struct FormEntreprise {
+    user_id: i32,
     name: String,
     date: String,
     codeape: String,
     status: String,
     submitted: bool,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Entreprise {
-    id: i32,
-    name: String,
-    date: String,
-    codeape: String,
-    status: String,
 }
 
 pub enum Msg {
@@ -45,8 +38,21 @@ impl Component for FormEntreprise {
     type Message = Msg;
     type Properties = ();
 
+    //Get user_id local_storage
     fn create(_ctx: &Context<Self>) -> Self {
+        let user_id = web_sys::window()
+            .unwrap()
+            .local_storage()
+            .unwrap()
+            .unwrap()
+            .get_item("user_id")
+            .unwrap()
+            .unwrap()
+            .parse::<i32>()
+            .unwrap();
+
         Self {
+            user_id,
             name: String::new(),
             date: String::new(),
             codeape: String::new(),
@@ -77,6 +83,7 @@ impl Component for FormEntreprise {
                 if !self.submitted {
                     let entreprise = Entreprise {
                         id: 0,
+                        user_id: self.user_id,
                         name: self.name.clone(),
                         date: self.date.clone(),
                         codeape: self.codeape.clone(),
@@ -94,8 +101,10 @@ impl Component for FormEntreprise {
 
                         if response.ok() {
                             let new_ent: Entreprise = response.json().await.unwrap();
+                            log::info!("Entreprise created: {:?}", new_ent);
                             Msg::SubmissionComplete(new_ent)
                         } else {
+                            log::error!("Failed to submit entreprise");
                             Msg::Submit
                         }
                     });
@@ -106,7 +115,7 @@ impl Component for FormEntreprise {
                 }
             }
             Msg::SubmissionComplete(new_ent) => {
-                log::info!("Submission completed.");
+                log::info!("Submission completed. Entreprise ID: {}", new_ent.id);
                 web_sys::window()
                     .unwrap()
                     .local_storage()

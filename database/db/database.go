@@ -20,6 +20,7 @@ type User struct {
 
 type Entreprises struct {
 	ID      int    `json:"id"`
+	UserID  int    `json:"user_id"`
 	Name    string `json:"name"`
 	Date    string `json:"date"`
 	Codeape string `json:"codeape"`

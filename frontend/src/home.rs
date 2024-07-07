@@ -24,6 +24,7 @@ pub struct User {
     lastname: String,
     firstname: String,
 }
+
 impl Component for FormModel {
     type Message = Msg;
     type Properties = ();
@@ -160,9 +161,9 @@ impl Component for FormModel {
 }
 
 impl FormModel {
-    fn view_box_title(&self) -> Html{
+    fn view_box_title(&self) -> Html {
         let title = "Je simule mon business plan".to_string();
-        html!{
+        html! {
             <div class="text-center text-grey-600 text-xl font-semibold mb-4">
                 <h1>{title}</h1>
             </div>

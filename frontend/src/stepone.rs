@@ -78,7 +78,7 @@ pub fn stepOne() -> Html {
                             let fetched_user: User = serde_json::from_str(&cached_user).unwrap();
                             user.set(Some(fetched_user));
                         } else {
-                            let url = format!("http://localhost:8080/get_user?id={}", user_id);
+                            let url = format!("http://localhost:8080/get_ent?id={}", user_id);
                             match Request::get(&url).send().await {
                                 Ok(response) => {
                                     match response.json::<User>().await {

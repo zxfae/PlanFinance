@@ -99,7 +99,7 @@ impl Component for FormModel {
         <div class="flex flex-col min-h-screen">
             { header() }
             <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
-                <div class="text-center text-gray-600 text-4xl font-semibold mb-2">
+                <div class="drop-shadow-md text-center text-gray-600 text-4xl font-semibold mb-20">
                     <h1>{ "Proposer, c'est possible !" }</h1>
                 <div class="text-center text-gray-600 text-2xl font-semibold m-2">
                     <h1>{"Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement"}</h1>
@@ -162,10 +162,9 @@ impl Component for FormModel {
 
 impl FormModel {
     fn view_box_title(&self) -> Html {
-        let title = "Je simule mon business plan".to_string();
         html! {
-            <div class="text-center text-grey-600 text-xl font-semibold mb-4">
-                <h1>{title}</h1>
+            <div class="text-center text-xl font-semibold mb-4">
+                <h1 class="text-gray-700">{"Je simule mon business plan"}</h1>
             </div>
         }
     }

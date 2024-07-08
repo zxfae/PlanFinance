@@ -47,14 +47,14 @@ func AddEntreprise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := Db.Prepare("INSERT INTO Entreprises(user_id, name, date, codeape, status) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := Db.Prepare("INSERT INTO Entreprises(user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(ent.UserID, ent.Name, ent.Date, ent.Codeape, ent.Status)
+	result, err := stmt.Exec(ent.UserID, ent.Name, ent.Date, ent.Codeape, ent.Status, ent.Jrsttx, ent.Jrsweek, ent.Jrsferies, ent.Jrscp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

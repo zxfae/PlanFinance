@@ -581,6 +581,7 @@ name = "frontend"
 version = "0.1.0"
 dependencies = [
  "log",
+ "regex",
  "reqwasm",
  "serde",
  "serde_json",

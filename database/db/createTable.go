@@ -23,6 +23,10 @@ func CreateTableEntreprise(db *sql.DB) error {
 		date TEXT NOT NULL,
 		codeape TEXT NOT NULL,
 		status TEXT NOT NULL,
+		jrsttx TEXT NOT NULL,
+		jrsweek TEXT NOT NULL,
+		jrsferies TEXT NOT NULL,
+		jrscp TEXT NOT NULL,
 		FOREIGN KEY(user_id) REFERENCES Users(id)
 	)`
 	_, err := db.Exec(table)

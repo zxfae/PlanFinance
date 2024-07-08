@@ -19,12 +19,16 @@ type User struct {
 }
 
 type Entreprises struct {
-	ID      int    `json:"id"`
-	UserID  int    `json:"user_id"`
-	Name    string `json:"name"`
-	Date    string `json:"date"`
-	Codeape string `json:"codeape"`
-	Status  string `json:"status"`
+	ID        int    `json:"id"`
+	UserID    int    `json:"user_id"`
+	Name      string `json:"name"`
+	Date      string `json:"date"`
+	Codeape   string `json:"codeape"`
+	Status    string `json:"status"`
+	Jrsttx    string `json:"jrsttx"`
+	Jrsweek   string `json:"jrsweek"`
+	Jrsferies string `json:"jrsferies"`
+	Jrscp     string `json:"jrscp"`
 }
 
 func InitDB() (*sql.DB, error) {
@@ -102,4 +106,24 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func GetEntreprise(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("user_id")
+	if id == "" {
+		http.Error(w, "Missing entreprise user_ID", http.StatusBadRequest)
+		return
+	}
+	var entreprise Entreprises
+	err := Db.QueryRow("SELECT * FROM Entreprises WHERE user_id = ?", id).Scan(&entreprise.ID, &entreprise.Name, &entreprise.Date, &entreprise.Codeape, &entreprise.Status, &entreprise.UserID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Entreprise not found", http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(entreprise)
 }

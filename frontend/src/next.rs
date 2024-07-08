@@ -19,6 +19,18 @@ pub struct Entreprise {
     jrsweek: String,
     jrsferies: String,
     jrscp: String,
+    jan: String,
+    fev: String,
+    mar: String,
+    avr: String,
+    mai: String,
+    juin: String,
+    jui: String,
+    aout: String,
+    sept: String,
+    oct: String,
+    nov: String,
+    dec: String,
 }
 
 pub struct FormEntreprise {
@@ -31,10 +43,23 @@ pub struct FormEntreprise {
     jrsweek: String,
     jrsferies: String,
     jrscp: String,
+    jan: String,
+    fev: String,
+    mar: String,
+    avr: String,
+    mai: String,
+    juin: String,
+    jui: String,
+    aout: String,
+    sept: String,
+    oct: String,
+    nov: String,
+    dec: String,
     submitted: bool,
     current_step: usize,
     decompte: u32,
     total: u32,
+    error_msg: Option<String>,
 }
 
 pub enum Msg {
@@ -46,6 +71,18 @@ pub enum Msg {
     UpdateJrsWeek(String),
     UpdateJrsFeries(String),
     UpdateJrsCp(String),
+    UpdateJan(String),
+    UpdateFev(String),
+    UpdateMar(String),
+    UpdateAvr(String),
+    UpdateMai(String),
+    UpdateJuin(String),
+    UpdateJui(String),
+    UpdateAout(String),
+    UpdateSept(String),
+    UpdateOct(String),
+    UpdateNov(String),
+    UpdateDec(String),
     CalculateDecompte,
     CalculateTotal,
     Submit,
@@ -83,10 +120,23 @@ impl Component for FormEntreprise {
             jrsweek: String::new(),
             jrsferies: String::new(),
             jrscp: String::new(),
+            jan: String::new(),
+            fev: String::new(),
+            mar: String::new(),
+            avr: String::new(),
+            mai: String::new(),
+            juin: String::new(),
+            jui: String::new(),
+            aout: String::new(),
+            sept: String::new(),
+            oct: String::new(),
+            nov: String::new(),
+            dec: String::new(),
             submitted: false,
             current_step: 1,
             decompte: 0,
             total: 0,
+            error_msg: None,
         }
     }
 
@@ -128,7 +178,66 @@ impl Component for FormEntreprise {
                 ctx.link().send_message(Msg::CalculateDecompte);
                 true
             }
-            //qubit project inspiration
+            Msg::UpdateJan(value) => {
+                self.jan = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateFev(value) => {
+                self.fev = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateMar(value) => {
+                self.mar = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateAvr(value) => {
+                self.avr = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateMai(value) => {
+                self.mai = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateJuin(value) => {
+                self.juin = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateJui(value) => {
+                self.jui = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateAout(value) => {
+                self.aout = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateSept(value) => {
+                self.sept = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateOct(value) => {
+                self.oct = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateNov(value) => {
+                self.nov = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
+            Msg::UpdateDec(value) => {
+                self.dec = value;
+                ctx.link().send_message(Msg::CalculateTotal);
+                true
+            }
             Msg::CalculateDecompte => {
                 self.decompte = self.jrsweek.parse::<u32>().unwrap_or(0) +
                     self.jrsferies.parse::<u32>().unwrap_or(0) +
@@ -138,49 +247,79 @@ impl Component for FormEntreprise {
             }
             Msg::CalculateTotal => {
                 self.total = self.jrsttx.parse::<u32>().unwrap_or(0) -
-                    self.decompte;
+                    self.decompte -
+                    self.jan.parse::<u32>().unwrap_or(0) -
+                    self.fev.parse::<u32>().unwrap_or(0) -
+                    self.mar.parse::<u32>().unwrap_or(0) -
+                    self.avr.parse::<u32>().unwrap_or(0) -
+                    self.mai.parse::<u32>().unwrap_or(0) -
+                    self.juin.parse::<u32>().unwrap_or(0) -
+                    self.jui.parse::<u32>().unwrap_or(0) -
+                    self.aout.parse::<u32>().unwrap_or(0) -
+                    self.sept.parse::<u32>().unwrap_or(0) -
+                    self.oct.parse::<u32>().unwrap_or(0) -
+                    self.nov.parse::<u32>().unwrap_or(0) -
+                    self.dec.parse::<u32>().unwrap_or(0);
                 true
             }
-
             Msg::Submit => {
+                //Check => count && more
                 if !self.submitted {
-                    if self.current_step == 1 {
-                        self.current_step += 1;
+                    if self.current_step == 3 && self.total != 0 {
+                        self.error_msg = Some("Le total des jours travaillés doit être égal à zéro.".to_string());
                         true
                     } else {
-                        let entreprise = Entreprise {
-                            id: 0,
-                            user_id: self.user_id,
-                            name: self.name.clone(),
-                            date: self.date.clone(),
-                            codeape: self.codeape.clone(),
-                            status: self.status.clone(),
-                            jrsttx: self.jrsttx.clone(),
-                            jrsweek: self.jrsweek.clone(),
-                            jrsferies: self.jrsferies.clone(),
-                            jrscp: self.jrscp.clone(),
-                        };
-                        let entreprise_json = serde_json::to_string(&entreprise).unwrap();
-                        log::info!("Submitting entreprise: {}", entreprise_json);
-                        ctx.link().send_future(async {
-                            let response = Request::post("http://localhost:8080/add_ent")
-                                .header("Content-Type", "application/json")
-                                .body(entreprise_json)
-                                .send()
-                                .await
-                                .unwrap();
+                        self.error_msg = None;
+                        if self.current_step < 3 {
+                            self.current_step += 1;
+                            true
+                        } else {
+                            let entreprise = Entreprise {
+                                id: 0,
+                                user_id: self.user_id,
+                                name: self.name.clone(),
+                                date: self.date.clone(),
+                                codeape: self.codeape.clone(),
+                                status: self.status.clone(),
+                                jrsttx: self.jrsttx.clone(),
+                                jrsweek: self.jrsweek.clone(),
+                                jrsferies: self.jrsferies.clone(),
+                                jrscp: self.jrscp.clone(),
+                                jan: self.jan.clone(),
+                                fev: self.fev.clone(),
+                                mar: self.mar.clone(),
+                                avr: self.avr.clone(),
+                                mai: self.mai.clone(),
+                                juin: self.juin.clone(),
+                                jui: self.jui.clone(),
+                                aout: self.aout.clone(),
+                                sept: self.sept.clone(),
+                                oct: self.oct.clone(),
+                                nov: self.nov.clone(),
+                                dec: self.dec.clone(),
+                            };
+                            let entreprise_json = serde_json::to_string(&entreprise).unwrap();
+                            log::info!("Submitting entreprise: {}", entreprise_json);
+                            ctx.link().send_future(async {
+                                let response = Request::post("http://localhost:8080/add_ent")
+                                    .header("Content-Type", "application/json")
+                                    .body(entreprise_json)
+                                    .send()
+                                    .await
+                                    .unwrap();
 
-                            if response.ok() {
-                                let new_ent: Entreprise = response.json().await.unwrap();
-                                log::info!("Entreprise created: {:?}", new_ent);
-                                Msg::SubmissionComplete(new_ent)
-                            } else {
-                                log::error!("Failed to submit entreprise");
-                                Msg::Submit
-                            }
-                        });
-                        self.submitted = true;
-                        true
+                                if response.ok() {
+                                    let new_ent: Entreprise = response.json().await.unwrap();
+                                    log::info!("Entreprise created: {:?}", new_ent);
+                                    Msg::SubmissionComplete(new_ent)
+                                } else {
+                                    log::error!("Failed to submit entreprise");
+                                    Msg::Submit
+                                }
+                            });
+                            self.submitted = true;
+                            true
+                        }
                     }
                 } else {
                     false
@@ -213,7 +352,7 @@ impl Component for FormEntreprise {
                         {
                             if self.current_step == 1 {
                                 self.render_step1(ctx)
-                            } else {
+                            } else if self.current_step == 2 {
                                 html! {
                                     <>
                                         <div class="mr-8">
@@ -221,6 +360,20 @@ impl Component for FormEntreprise {
                                         </div>
                                         <div>
                                             { self.render_step2(ctx) }
+                                        </div>
+                                    </>
+                                }
+                            } else {
+                                html! {
+                                    <>
+                                        <div class="mr-8">
+                                            { self.render_step1(ctx) }
+                                        </div>
+                                        <div class="mr-8">
+                                            { self.render_step2(ctx) }
+                                        </div>
+                                        <div>
+                                            { self.render_step3(ctx) }
                                         </div>
                                     </>
                                 }
@@ -424,6 +577,224 @@ impl FormEntreprise {
         }
     }
 
+    fn render_step3(&self, ctx: &Context<Self>) -> Html {
+        html! {
+        <>
+            <div class="w-full max-w-md mx-auto">
+                <div class="text-center text-gray-600 text-4xl font-semibold">
+                    <h1>{ "Étape 3" }</h1>
+                </div>
+                <div class="text-center text-gray-600 text-2xl font-semibold m-2">
+                    <h1>{ "Cette section calcule les jours travaillés et non travaillés :" }</h1>
+                </div>
+                <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+                      onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                          e.prevent_default();
+                          Msg::Submit
+                      })}>
+                    <table class="table-auto mb-4">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="px-4 py-2">{ "Mois" }</th>
+                                <th class="px-4 py-2">{ "Nombre de jours" }</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Janvier" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés jan."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateJan(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Février" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés fév."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateFev(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Mars" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés mar."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateMar(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Avril" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés avr."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateAvr(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Mai" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés mai."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateMai(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Juin" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés juin"
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateJuin(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Juillet" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés juil."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateJui(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Aout" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés aout."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateAout(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Septembre" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés sept."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateSept(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Octobre" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés oct."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateOct(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Novembre" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés nov."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateNov(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                            <tr class="bg-gray-100">
+                                <td class="border px-4 py-2">{ "Décembre" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                        type="text"
+                                        placeholder="Jours travaillés déc."
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateDec(input.value())
+                                        })}
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Total jours travaillés: " }<div class="text-red-500">{ self.total }</div></div>
+                    //total = 12 ? need to be 0 to submit form
+                    {
+                        if let Some(ref message) = self.error_msg {
+                            html! {
+                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                    { message }
+                                </div>
+                            }
+                        } else {
+                            html! { <></> }
+                        }
+                    }
+                    <div class="flex items-center justify-center">
+                        <button class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                type="submit">
+                            { "Soumettre" }
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </>
+    }
+    }
+
     fn view_box_title(&self) -> Html {
         html! {
             <div class="mb-4 text-xl font-bold text-center text-gray-700">
@@ -432,10 +803,18 @@ impl FormEntreprise {
         }
     }
 
-    fn view_form_deux(&self) -> Html{
-        html!{
+    fn view_form_deux(&self) -> Html {
+        html! {
             <div class="mb-4 text-xl font-bold text-center text-gray-700">
-                {"Décompte des Jours Travaillés et Non Travaillés"}
+                { "Décompte des Jours Travaillés et Non Travaillés" }
+            </div>
+        }
+    }
+
+    fn view_form_trois(&self) -> Html {
+        html! {
+            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+                { "Répartition des Jours Travaillés À l'Année" }
             </div>
         }
     }

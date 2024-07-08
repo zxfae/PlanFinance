@@ -47,14 +47,14 @@ func AddEntreprise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := Db.Prepare("INSERT INTO Entreprises(user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := Db.Prepare("INSERT INTO Entreprises(user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp, jan, fev, mar, avr, mai, juin, jui, aout, sept, oct, nov, dec) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(ent.UserID, ent.Name, ent.Date, ent.Codeape, ent.Status, ent.Jrsttx, ent.Jrsweek, ent.Jrsferies, ent.Jrscp)
+	result, err := stmt.Exec(ent.UserID, ent.Name, ent.Date, ent.Codeape, ent.Status, ent.Jrsttx, ent.Jrsweek, ent.Jrsferies, ent.Jrscp, ent.Jan, ent.Fev, ent.Mar, ent.Avr, ent.Mai, ent.Juin, ent.Jui, ent.Aout, ent.Sept, ent.Oct, ent.Nov, ent.Dec)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

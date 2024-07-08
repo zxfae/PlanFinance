@@ -29,6 +29,18 @@ type Entreprises struct {
 	Jrsweek   string `json:"jrsweek"`
 	Jrsferies string `json:"jrsferies"`
 	Jrscp     string `json:"jrscp"`
+	Jan       string `json:"jan"`
+	Fev       string `json:"fev"`
+	Mar       string `json:"mar"`
+	Avr       string `json:"avr"`
+	Mai       string `json:"mai"`
+	Juin      string `json:"juin"`
+	Jui       string `json:"jui"`
+	Aout      string `json:"aout"`
+	Sept      string `json:"sept"`
+	Oct       string `json:"oct"`
+	Nov       string `json:"nov"`
+	Dec       string `json:"dec"`
 }
 
 func InitDB() (*sql.DB, error) {

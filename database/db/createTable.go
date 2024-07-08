@@ -27,6 +27,18 @@ func CreateTableEntreprise(db *sql.DB) error {
 		jrsweek TEXT NOT NULL,
 		jrsferies TEXT NOT NULL,
 		jrscp TEXT NOT NULL,
+		jan TEXT NOT NULL,
+		fev TEXT NOT NULL,
+		mar TEXT  NOT NULL,
+		avr TEXT NOT NULL,
+		mai TEXT NOT NULL,
+		juin TEXT NOT NULL,
+		jui TEXT NOT NULL,
+		aout TEXT NOT NULL,
+		sept TEXT NOT NULL,
+		oct TEXT NOT NULL,
+		nov TEXT NOT NULL,
+		dec TEXT NOT NULL,
 		FOREIGN KEY(user_id) REFERENCES Users(id)
 	)`
 	_, err := db.Exec(table)

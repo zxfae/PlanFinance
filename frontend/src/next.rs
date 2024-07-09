@@ -6,7 +6,15 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
 use crate::header;
 use crate::footer;
+extern crate regex;
+use regex::Regex;
 
+pub fn date_test(date: &str) -> bool {
+    let date_regex = r"(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$";
+
+    let re = Regex::new(date_regex).unwrap();
+    re.is_match(date)
+}
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Entreprise {
     id: i32,
@@ -266,7 +274,7 @@ impl Component for FormEntreprise {
                 //Check => count && more
                 if !self.submitted {
                     if self.current_step == 3 && self.total != 0 {
-                        self.error_msg = Some("Le total des jours travaillés doit être égal à zéro.".to_string());
+                        self.error_msg = Some("Il vous reste des jours a positionner".to_string());
                         true
                     } else {
                         self.error_msg = None;
@@ -486,9 +494,14 @@ impl FormEntreprise {
     }
 
     fn render_step2(&self, ctx: &Context<Self>) -> Html {
+        let class = if self.current_step == 2 {
+            "w-full max-w-md"
+        } else {
+            "w-full max-w-md opacity-50"
+        };
         html! {
             <>
-                <div class="w-full max-w-md">
+                <div class={class}>
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 2" }</h1>
                     <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
@@ -770,7 +783,15 @@ impl FormEntreprise {
                             </tr>
                         </tbody>
                     </table>
-                    <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Total jours travaillés: " }<div class="text-red-500">{ self.total }</div></div>
+                    <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                      { "Il vous reste " }
+                      <div class="text-red-500">
+                        { self.total }
+                      </div>
+                      <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                        {"jours a positionner"}
+                      </div>
+                    </div>
                     //total = 12 ? need to be 0 to submit form
                     {
                         if let Some(ref message) = self.error_msg {

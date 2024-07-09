@@ -15,7 +15,7 @@ use wasm_bindgen::prelude::*;
 enum AppRoute {
     #[at("/")]
     Home,
-    #[at("/form_entreprise")]
+    #[at("/success")]
     FormEntreprise,
     #[at("/step_one")]
     StepOne,

@@ -271,19 +271,16 @@ impl Component for FormEntreprise {
                     self.oct as i32 -
                     self.nov as i32 -
                     self.dec as i32;
-                if self.total < 0 {
-                    self.total = 0;
-                }
                 true
             }
             Msg::Submit => {
                 if !self.submitted {
-                    if self.current_step == 2 && self.total == 0 && self.current_step != 3 {
+                    if self.current_step == 2 && self.total == 0 && self.current_step != 3 || self.current_step == 2 && self.total < 0 && self.current_step != 3 {
                         self.error_msg = Some("Erreur : Aucun jours travaillés".to_string());
                         true
-                    } else if self.current_step == 3 && self.total != 0 && self.current_step != 2 {
+                    } else if self.current_step == 3 && self.total != 0 && self.current_step != 2 || self.current_step == 3 && self.total < 0 && self.current_step != 2 {
                         self.error_msg = None;
-                        self.oth_err = Some("Il vous reste des jours à positionner".to_string());
+                        self.oth_err = Some("Mauvais positionnement, recommencez".to_string());
                         true
                     } else {
                         if self.current_step < 3 {

@@ -65,8 +65,8 @@ pub struct FormEntreprise {
     dec: String,
     submitted: bool,
     current_step: usize,
-    decompte: u32,
-    total: u32,
+    decompte: i32,
+    total: i32,
     error_msg: Option<String>,
 }
 
@@ -247,33 +247,39 @@ impl Component for FormEntreprise {
                 true
             }
             Msg::CalculateDecompte => {
-                self.decompte = self.jrsweek.parse::<u32>().unwrap_or(0) +
-                    self.jrsferies.parse::<u32>().unwrap_or(0) +
-                    self.jrscp.parse::<u32>().unwrap_or(0);
+                self.decompte = self.jrsweek.parse::<i32>().unwrap_or(0) +
+                    self.jrsferies.parse::<i32>().unwrap_or(0) +
+                    self.jrscp.parse::<i32>().unwrap_or(0);
                 ctx.link().send_message(Msg::CalculateTotal);
                 true
             }
             Msg::CalculateTotal => {
-                self.total = self.jrsttx.parse::<u32>().unwrap_or(0) -
+                self.total = self.jrsttx.parse::<i32>().unwrap_or(0) -
                     self.decompte -
-                    self.jan.parse::<u32>().unwrap_or(0) -
-                    self.fev.parse::<u32>().unwrap_or(0) -
-                    self.mar.parse::<u32>().unwrap_or(0) -
-                    self.avr.parse::<u32>().unwrap_or(0) -
-                    self.mai.parse::<u32>().unwrap_or(0) -
-                    self.juin.parse::<u32>().unwrap_or(0) -
-                    self.jui.parse::<u32>().unwrap_or(0) -
-                    self.aout.parse::<u32>().unwrap_or(0) -
-                    self.sept.parse::<u32>().unwrap_or(0) -
-                    self.oct.parse::<u32>().unwrap_or(0) -
-                    self.nov.parse::<u32>().unwrap_or(0) -
-                    self.dec.parse::<u32>().unwrap_or(0);
+                    self.jan.parse::<i32>().unwrap_or(0) -
+                    self.fev.parse::<i32>().unwrap_or(0) -
+                    self.mar.parse::<i32>().unwrap_or(0) -
+                    self.avr.parse::<i32>().unwrap_or(0) -
+                    self.mai.parse::<i32>().unwrap_or(0) -
+                    self.juin.parse::<i32>().unwrap_or(0) -
+                    self.jui.parse::<i32>().unwrap_or(0) -
+                    self.aout.parse::<i32>().unwrap_or(0) -
+                    self.sept.parse::<i32>().unwrap_or(0) -
+                    self.oct.parse::<i32>().unwrap_or(0) -
+                    self.nov.parse::<i32>().unwrap_or(0) -
+                    self.dec.parse::<i32>().unwrap_or(0);
+                if self.total < 0{
+                    self.total = 0;
+                }
                 true
             }
             Msg::Submit => {
                 //Check => count && more
                 if !self.submitted {
-                    if self.current_step == 3 && self.total != 0 {
+                    if self.decompte > self.total{
+                        self.error_msg = Some("Erreur : Jours non travaillés supérieur aux jours travaillés".to_string());
+                        true
+                    }else if self.current_step == 3 && self.total != 0 {
                         self.error_msg = Some("Il vous reste des jours a positionner".to_string());
                         true
                     } else {
@@ -575,6 +581,17 @@ impl FormEntreprise {
                         </div>
                         <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Décompte jours non travaillés: " }<div class="mb-2 text-center text-sm font-semibold text-red-500">{ self.decompte }</div></div>
                         <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Total jours travaillés: " }<div class="text-red-500">{ self.total }</div></div>
+                        {
+                        if let Some(ref message) = self.error_msg {
+                            html! {
+                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                    { message }
+                                </div>
+                            }
+                        } else {
+                            html! { <></> }
+                        }
+                        }
                         <div class="flex items-center justify-center">
                             <button
                                 class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

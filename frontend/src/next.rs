@@ -68,6 +68,7 @@ pub struct FormEntreprise {
     decompte: i32,
     total: i32,
     error_msg: Option<String>,
+    oth_err: Option<String>,
 }
 
 pub enum Msg {
@@ -145,6 +146,8 @@ impl Component for FormEntreprise {
             decompte: 0,
             total: 0,
             error_msg: None,
+            oth_err: None,
+
         }
     }
 
@@ -276,14 +279,15 @@ impl Component for FormEntreprise {
             Msg::Submit => {
                 //Check => count && more
                 if !self.submitted {
-                    if self.decompte > self.total{
-                        self.error_msg = Some("Erreur : Jours non travaillés supérieur aux jours travaillés".to_string());
+                    //Handle self.total error
+                    if self.current_step == 2 && self.total == 0 && self.current_step != 3{
+                        self.error_msg = Some("Erreur : Aucun jours travaillés".to_string());
                         true
-                    }else if self.current_step == 3 && self.total != 0 {
-                        self.error_msg = Some("Il vous reste des jours a positionner".to_string());
+                    }else if self.current_step == 3 && self.total != 0 && self.current_step != 2{
+                        self.error_msg = None;
+                        self.oth_err = Some("Il vous reste des jours a positionner".to_string());
                         true
                     } else {
-                        self.error_msg = None;
                         if self.current_step < 3 {
                             self.current_step += 1;
                             true
@@ -364,46 +368,45 @@ impl Component for FormEntreprise {
                 <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
                     <div class="flex flex-row w-full justify-center">
                         {
-                            if self.current_step == 1 {
-                                self.render_step1(ctx)
-                            } else if self.current_step == 2 {
-                                html! {
+                            match self.current_step {
+                                1 => self.render_step1(ctx, false),
+                                2 => html! {
                                     <>
                                         <div class="mr-8">
-                                            { self.render_step1(ctx) }
+                                            { self.render_step1(ctx, true) }
                                         </div>
                                         <div>
-                                            { self.render_step2(ctx) }
+                                            { self.render_step2(ctx, false) }
                                         </div>
                                     </>
-                                }
-                            } else {
-                                html! {
+                                },
+                                3 => html! {
                                     <>
                                         <div class="mr-8">
-                                            { self.render_step1(ctx) }
+                                            { self.render_step1(ctx, true) }
                                         </div>
                                         <div class="mr-8">
-                                            { self.render_step2(ctx) }
+                                            { self.render_step2(ctx, true) }
                                         </div>
                                         <div>
-                                            { self.render_step3(ctx) }
+                                            { self.render_step3(ctx, false) }
                                         </div>
                                     </>
-                                }
+                                },
+                                _ => html! {},
                             }
                         }
                     </div>
                 </div>
                 { footer() }
             </div>
-            }
+        }
         }
     }
 }
-
 impl FormEntreprise {
-    fn render_step1(&self, ctx: &Context<Self>) -> Html {
+    //change fn parameters to handle submission => disable
+    fn render_step1(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         let class = if self.current_step == 1 {
             "w-full max-w-md"
         } else {
@@ -415,16 +418,16 @@ impl FormEntreprise {
                 <div class={class}>
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 1" }</h1>
-                    <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
-                        <h1>{"Afin de commencer votre simulation, veuillez renseigner votre future situation :"}</h1>
-                    </div>
+                        <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
+                            <h1>{ "Afin de commencer votre simulation, veuillez renseigner votre future situation :" }</h1>
+                        </div>
                     </div>
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
                         Msg::Submit
                     })}>
                         <div class="mb-4">
-                            {self.view_box_title()}
+                            { self.view_box_title() }
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="name">{ "Nom de votre entreprise" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
@@ -436,7 +439,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateName(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -451,7 +454,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateDate(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -466,7 +469,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateCodeApe(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -481,14 +484,15 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateStatus(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="flex items-center justify-center">
                             <button
                                 class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 type="submit"
-                                disabled={self.submitted}
+                                //desactivate submission or not
+                                disabled={self.submitted || disabled}
                             >
                                 { "SUIVANT" }
                             </button>
@@ -499,7 +503,7 @@ impl FormEntreprise {
         }
     }
 
-    fn render_step2(&self, ctx: &Context<Self>) -> Html {
+    fn render_step2(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         let class = if self.current_step == 2 {
             "w-full max-w-md"
         } else {
@@ -510,16 +514,16 @@ impl FormEntreprise {
                 <div class={class}>
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 2" }</h1>
-                    <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
-                        <h1>{"Cette section calcule les jours travaillés et non travaillés :"}</h1>
-                    </div>
+                        <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
+                            <h1>{ "Cette section calcule les jours travaillés et non travaillés :" }</h1>
+                        </div>
                     </div>
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
                         Msg::Submit
                     })}>
                         <div class="mb-6">
-                            {self.view_form_deux()}
+                            { self.view_form_deux() }
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsttx">{ "Jours travaillés dans l'année" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
@@ -531,7 +535,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateJrsTTX(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -546,7 +550,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateJrsWeek(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -561,7 +565,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateJrsFeries(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-6">
@@ -576,7 +580,7 @@ impl FormEntreprise {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     Msg::UpdateJrsCp(input.value())
                                 })}
-                            required=true
+                                required=true
                             />
                         </div>
                         <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Décompte jours non travaillés: " }<div class="mb-2 text-center text-sm font-semibold text-red-500">{ self.decompte }</div></div>
@@ -596,7 +600,7 @@ impl FormEntreprise {
                             <button
                                 class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 type="submit"
-                                disabled={self.submitted}
+                                disabled={self.submitted || disabled}
                             >
                                 { "SUIVANT" }
                             </button>
@@ -607,7 +611,7 @@ impl FormEntreprise {
         }
     }
 
-    fn render_step3(&self, ctx: &Context<Self>) -> Html {
+    fn render_step3(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         html! {
         <>
             <div class="w-full max-w-md mx-auto">
@@ -811,7 +815,7 @@ impl FormEntreprise {
                     </div>
                     //total = 12 ? need to be 0 to submit form
                     {
-                        if let Some(ref message) = self.error_msg {
+                        if let Some(ref message) = self.oth_err {
                             html! {
                                 <div class="mb-2 text-center text-sm font-semibold text-red-500">
                                     { message }
@@ -823,7 +827,9 @@ impl FormEntreprise {
                     }
                     <div class="flex items-center justify-center">
                         <button class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                type="submit">
+                                type="submit"
+                                disabled={self.submitted || disabled}
+                        >
                             { "Soumettre" }
                         </button>
                     </div>
@@ -872,3 +878,4 @@ impl FormEntreprise {
         }
     }
 }
+

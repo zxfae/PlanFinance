@@ -1,6 +1,12 @@
-i need fix f5 bug for next.rs
-
 next.rs
-fix  backend, respnses format
-(date && JRS)
 
+render 1 =
+fix date regex check,
+fix self.submit att step 2
+
+render 2 = fix value i32, can place words reg ?
+fix self.submit att step
+
+render 3 fix value i 32,
+
+change value DB ?

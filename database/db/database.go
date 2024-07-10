@@ -25,22 +25,22 @@ type Entreprises struct {
 	Date      string `json:"date"`
 	Codeape   string `json:"codeape"`
 	Status    string `json:"status"`
-	Jrsttx    string `json:"jrsttx"`
-	Jrsweek   string `json:"jrsweek"`
-	Jrsferies string `json:"jrsferies"`
-	Jrscp     string `json:"jrscp"`
-	Jan       string `json:"jan"`
-	Fev       string `json:"fev"`
-	Mar       string `json:"mar"`
-	Avr       string `json:"avr"`
-	Mai       string `json:"mai"`
-	Juin      string `json:"juin"`
-	Jui       string `json:"jui"`
-	Aout      string `json:"aout"`
-	Sept      string `json:"sept"`
-	Oct       string `json:"oct"`
-	Nov       string `json:"nov"`
-	Dec       string `json:"dec"`
+	Jrsttx    int    `json:"jrsttx"`
+	Jrsweek   int    `json:"jrsweek"`
+	Jrsferies int    `json:"jrsferies"`
+	Jrscp     int    `json:"jrscp"`
+	Jan       int    `json:"jan"`
+	Fev       int    `json:"fev"`
+	Mar       int    `json:"mar"`
+	Avr       int    `json:"avr"`
+	Mai       int    `json:"mai"`
+	Juin      int    `json:"juin"`
+	Jui       int    `json:"jui"`
+	Aout      int    `json:"aout"`
+	Sept      int    `json:"sept"`
+	Oct       int    `json:"oct"`
+	Nov       int    `json:"nov"`
+	Dec       int    `json:"dec"`
 }
 
 func InitDB() (*sql.DB, error) {

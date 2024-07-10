@@ -15,6 +15,7 @@ pub fn date_test(date: &str) -> bool {
     let re = Regex::new(date_regex).unwrap();
     re.is_match(date)
 }
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Entreprise {
     id: i32,
@@ -23,22 +24,22 @@ pub struct Entreprise {
     date: String,
     codeape: String,
     status: String,
-    jrsttx: String,
-    jrsweek: String,
-    jrsferies: String,
-    jrscp: String,
-    jan: String,
-    fev: String,
-    mar: String,
-    avr: String,
-    mai: String,
-    juin: String,
-    jui: String,
-    aout: String,
-    sept: String,
-    oct: String,
-    nov: String,
-    dec: String,
+    jrsttx: i32,
+    jrsweek: i16,
+    jrsferies: i8,
+    jrscp: i8,
+    jan: i8,
+    fev: i8,
+    mar: i8,
+    avr: i8,
+    mai: i8,
+    juin: i8,
+    jui: i8,
+    aout: i8,
+    sept: i8,
+    oct: i8,
+    nov: i8,
+    dec: i8,
 }
 
 pub struct FormEntreprise {
@@ -47,22 +48,22 @@ pub struct FormEntreprise {
     date: String,
     codeape: String,
     status: String,
-    jrsttx: String,
-    jrsweek: String,
-    jrsferies: String,
-    jrscp: String,
-    jan: String,
-    fev: String,
-    mar: String,
-    avr: String,
-    mai: String,
-    juin: String,
-    jui: String,
-    aout: String,
-    sept: String,
-    oct: String,
-    nov: String,
-    dec: String,
+    jrsttx: i32,
+    jrsweek: i16,
+    jrsferies: i8,
+    jrscp: i8,
+    jan: i8,
+    fev: i8,
+    mar: i8,
+    avr: i8,
+    mai: i8,
+    juin: i8,
+    jui: i8,
+    aout: i8,
+    sept: i8,
+    oct: i8,
+    nov: i8,
+    dec: i8,
     submitted: bool,
     current_step: usize,
     decompte: i32,
@@ -76,22 +77,22 @@ pub enum Msg {
     UpdateDate(String),
     UpdateCodeApe(String),
     UpdateStatus(String),
-    UpdateJrsTTX(String),
-    UpdateJrsWeek(String),
-    UpdateJrsFeries(String),
-    UpdateJrsCp(String),
-    UpdateJan(String),
-    UpdateFev(String),
-    UpdateMar(String),
-    UpdateAvr(String),
-    UpdateMai(String),
-    UpdateJuin(String),
-    UpdateJui(String),
-    UpdateAout(String),
-    UpdateSept(String),
-    UpdateOct(String),
-    UpdateNov(String),
-    UpdateDec(String),
+    UpdateJrsTTX(i32),
+    UpdateJrsWeek(i16),
+    UpdateJrsFeries(i8),
+    UpdateJrsCp(i8),
+    UpdateJan(i8),
+    UpdateFev(i8),
+    UpdateMar(i8),
+    UpdateAvr(i8),
+    UpdateMai(i8),
+    UpdateJuin(i8),
+    UpdateJui(i8),
+    UpdateAout(i8),
+    UpdateSept(i8),
+    UpdateOct(i8),
+    UpdateNov(i8),
+    UpdateDec(i8),
     CalculateDecompte,
     CalculateTotal,
     Submit,
@@ -125,29 +126,28 @@ impl Component for FormEntreprise {
             date: String::new(),
             codeape: String::new(),
             status: String::new(),
-            jrsttx: String::new(),
-            jrsweek: String::new(),
-            jrsferies: String::new(),
-            jrscp: String::new(),
-            jan: String::new(),
-            fev: String::new(),
-            mar: String::new(),
-            avr: String::new(),
-            mai: String::new(),
-            juin: String::new(),
-            jui: String::new(),
-            aout: String::new(),
-            sept: String::new(),
-            oct: String::new(),
-            nov: String::new(),
-            dec: String::new(),
+            jrsttx: 0,
+            jrsweek: 0,
+            jrsferies: 0,
+            jrscp: 0,
+            jan: 0,
+            fev: 0,
+            mar: 0,
+            avr: 0,
+            mai: 0,
+            juin: 0,
+            jui: 0,
+            aout: 0,
+            sept: 0,
+            oct: 0,
+            nov: 0,
+            dec: 0,
             submitted: false,
             current_step: 1,
             decompte: 0,
             total: 0,
             error_msg: None,
             oth_err: None,
-
         }
     }
 
@@ -250,42 +250,40 @@ impl Component for FormEntreprise {
                 true
             }
             Msg::CalculateDecompte => {
-                self.decompte = self.jrsweek.parse::<i32>().unwrap_or(0) +
-                    self.jrsferies.parse::<i32>().unwrap_or(0) +
-                    self.jrscp.parse::<i32>().unwrap_or(0);
+                self.decompte = self.jrsweek as i32 +
+                    self.jrsferies as i32 +
+                    self.jrscp as i32;
                 ctx.link().send_message(Msg::CalculateTotal);
                 true
             }
             Msg::CalculateTotal => {
-                self.total = self.jrsttx.parse::<i32>().unwrap_or(0) -
+                self.total = self.jrsttx -
                     self.decompte -
-                    self.jan.parse::<i32>().unwrap_or(0) -
-                    self.fev.parse::<i32>().unwrap_or(0) -
-                    self.mar.parse::<i32>().unwrap_or(0) -
-                    self.avr.parse::<i32>().unwrap_or(0) -
-                    self.mai.parse::<i32>().unwrap_or(0) -
-                    self.juin.parse::<i32>().unwrap_or(0) -
-                    self.jui.parse::<i32>().unwrap_or(0) -
-                    self.aout.parse::<i32>().unwrap_or(0) -
-                    self.sept.parse::<i32>().unwrap_or(0) -
-                    self.oct.parse::<i32>().unwrap_or(0) -
-                    self.nov.parse::<i32>().unwrap_or(0) -
-                    self.dec.parse::<i32>().unwrap_or(0);
-                if self.total < 0{
+                    self.jan as i32 -
+                    self.fev as i32 -
+                    self.mar as i32 -
+                    self.avr as i32 -
+                    self.mai as i32 -
+                    self.juin as i32 -
+                    self.jui as i32 -
+                    self.aout as i32 -
+                    self.sept as i32 -
+                    self.oct as i32 -
+                    self.nov as i32 -
+                    self.dec as i32;
+                if self.total < 0 {
                     self.total = 0;
                 }
                 true
             }
             Msg::Submit => {
-                //Check => count && more
                 if !self.submitted {
-                    //Handle self.total error
-                    if self.current_step == 2 && self.total == 0 && self.current_step != 3{
+                    if self.current_step == 2 && self.total == 0 && self.current_step != 3 {
                         self.error_msg = Some("Erreur : Aucun jours travaillés".to_string());
                         true
-                    }else if self.current_step == 3 && self.total != 0 && self.current_step != 2{
+                    } else if self.current_step == 3 && self.total != 0 && self.current_step != 2 {
                         self.error_msg = None;
-                        self.oth_err = Some("Il vous reste des jours a positionner".to_string());
+                        self.oth_err = Some("Il vous reste des jours à positionner".to_string());
                         true
                     } else {
                         if self.current_step < 3 {
@@ -299,22 +297,22 @@ impl Component for FormEntreprise {
                                 date: self.date.clone(),
                                 codeape: self.codeape.clone(),
                                 status: self.status.clone(),
-                                jrsttx: self.jrsttx.clone(),
-                                jrsweek: self.jrsweek.clone(),
-                                jrsferies: self.jrsferies.clone(),
-                                jrscp: self.jrscp.clone(),
-                                jan: self.jan.clone(),
-                                fev: self.fev.clone(),
-                                mar: self.mar.clone(),
-                                avr: self.avr.clone(),
-                                mai: self.mai.clone(),
-                                juin: self.juin.clone(),
-                                jui: self.jui.clone(),
-                                aout: self.aout.clone(),
-                                sept: self.sept.clone(),
-                                oct: self.oct.clone(),
-                                nov: self.nov.clone(),
-                                dec: self.dec.clone(),
+                                jrsttx: self.jrsttx,
+                                jrsweek: self.jrsweek,
+                                jrsferies: self.jrsferies,
+                                jrscp: self.jrscp,
+                                jan: self.jan,
+                                fev: self.fev,
+                                mar: self.mar,
+                                avr: self.avr,
+                                mai: self.mai,
+                                juin: self.juin,
+                                jui: self.jui,
+                                aout: self.aout,
+                                sept: self.sept,
+                                oct: self.oct,
+                                nov: self.nov,
+                                dec: self.dec,
                             };
                             let entreprise_json = serde_json::to_string(&entreprise).unwrap();
                             log::info!("Submitting entreprise: {}", entreprise_json);
@@ -363,49 +361,49 @@ impl Component for FormEntreprise {
             self.success(ctx)
         } else {
             html! {
-            <div class="flex flex-col min-h-screen">
-                { header() }
-                <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
-                    <div class="flex flex-row w-full justify-center">
-                        {
-                            match self.current_step {
-                                1 => self.render_step1(ctx, false),
-                                2 => html! {
-                                    <>
-                                        <div class="mr-8">
-                                            { self.render_step1(ctx, true) }
-                                        </div>
-                                        <div>
-                                            { self.render_step2(ctx, false) }
-                                        </div>
-                                    </>
-                                },
-                                3 => html! {
-                                    <>
-                                        <div class="mr-8">
-                                            { self.render_step1(ctx, true) }
-                                        </div>
-                                        <div class="mr-8">
-                                            { self.render_step2(ctx, true) }
-                                        </div>
-                                        <div>
-                                            { self.render_step3(ctx, false) }
-                                        </div>
-                                    </>
-                                },
-                                _ => html! {},
+                <div class="flex flex-col min-h-screen">
+                    { header() }
+                    <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                        <div class="flex flex-row w-full justify-center">
+                            {
+                                match self.current_step {
+                                    1 => self.render_step1(ctx, false),
+                                    2 => html! {
+                                        <>
+                                            <div class="mr-8">
+                                                { self.render_step1(ctx, true) }
+                                            </div>
+                                            <div>
+                                                { self.render_step2(ctx, false) }
+                                            </div>
+                                        </>
+                                    },
+                                    3 => html! {
+                                        <>
+                                            <div class="mr-8">
+                                                { self.render_step1(ctx, true) }
+                                            </div>
+                                            <div class="mr-8">
+                                                { self.render_step2(ctx, true) }
+                                            </div>
+                                            <div>
+                                                { self.render_step3(ctx, false) }
+                                            </div>
+                                        </>
+                                    },
+                                    _ => html! {},
+                                }
                             }
-                        }
+                        </div>
                     </div>
+                    { footer() }
                 </div>
-                { footer() }
-            </div>
-        }
+            }
         }
     }
 }
+
 impl FormEntreprise {
-    //change fn parameters to handle submission => disable
     fn render_step1(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         let class = if self.current_step == 1 {
             "w-full max-w-md"
@@ -491,7 +489,6 @@ impl FormEntreprise {
                             <button
                                 class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 type="submit"
-                                //desactivate submission or not
                                 disabled={self.submitted || disabled}
                             >
                                 { "SUIVANT" }
@@ -526,14 +523,16 @@ impl FormEntreprise {
                             { self.view_form_deux() }
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsttx">{ "Jours travaillés dans l'année" }</label>
                             <input
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsttx"
                                 type="text"
-                                placeholder="Année pleine : 365 jours"
-                                value={self.jrsttx.clone()}
+                                value={self.jrsttx.to_string()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateJrsTTX(input.value())
+                                    match input.value().parse::<i32>() {
+                                        Ok(value) => Msg::UpdateJrsTTX(value),
+                                        Err(_) => Msg::UpdateJrsTTX(0),
+                                    }
                                 })}
                                 required=true
                             />
@@ -541,14 +540,16 @@ impl FormEntreprise {
                         <div class="mb-6">
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsweek">{ "Jours week-end" }</label>
                             <input
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsweek"
                                 type="text"
-                                placeholder="En moyenne 104 jours"
-                                value={self.jrsweek.clone()}
+                                value={self.jrsweek.to_string()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateJrsWeek(input.value())
+                                    match input.value().parse::<i16>() {
+                                        Ok(value) => Msg::UpdateJrsWeek(value),
+                                        Err(_) => Msg::UpdateJrsWeek(0),
+                                    }
                                 })}
                                 required=true
                             />
@@ -556,14 +557,16 @@ impl FormEntreprise {
                         <div class="mb-6">
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsferies">{ "Jours fériés" }</label>
                             <input
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsferies"
                                 type="text"
-                                placeholder="En moyenne 11 jours"
-                                value={self.jrsferies.clone()}
+                                value={self.jrsferies.to_string()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateJrsFeries(input.value())
+                                    match input.value().parse::<i8>() {
+                                        Ok(value) => Msg::UpdateJrsFeries(value),
+                                        Err(_) => Msg::UpdateJrsFeries(0),
+                                    }
                                 })}
                                 required=true
                             />
@@ -571,14 +574,16 @@ impl FormEntreprise {
                         <div class="mb-6">
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrscp">{ "Jours congés payés" }</label>
                             <input
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrscp"
                                 type="text"
-                                placeholder="En moyenne 25 jours"
-                                value={self.jrscp.clone()}
+                                value={self.jrscp.to_string()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateJrsCp(input.value())
+                                    match input.value().parse::<i8>() {
+                                        Ok(value) => Msg::UpdateJrsCp(value),
+                                        Err(_) => Msg::UpdateJrsCp(0),
+                                    }
                                 })}
                                 required=true
                             />
@@ -586,15 +591,15 @@ impl FormEntreprise {
                         <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Décompte jours non travaillés: " }<div class="mb-2 text-center text-sm font-semibold text-red-500">{ self.decompte }</div></div>
                         <div class="mb-2 text-center text-sm font-semibold text-gray-700">{ "Total jours travaillés: " }<div class="text-red-500">{ self.total }</div></div>
                         {
-                        if let Some(ref message) = self.error_msg {
-                            html! {
-                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
-                                    { message }
-                                </div>
+                            if let Some(ref message) = self.error_msg {
+                                html! {
+                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                        { message }
+                                    </div>
+                                }
+                            } else {
+                                html! { <></> }
                             }
-                        } else {
-                            html! { <></> }
-                        }
                         }
                         <div class="flex items-center justify-center">
                             <button
@@ -613,230 +618,265 @@ impl FormEntreprise {
 
     fn render_step3(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         html! {
-        <>
-            <div class="w-full max-w-md mx-auto">
-                <div class="text-center text-gray-600 text-4xl font-semibold">
-                    <h1>{ "Étape 3" }</h1>
-                </div>
-                <div class="text-center text-gray-600 text-2xl font-semibold m-2">
-                    <h1>{ "Cette section calcule les jours travaillés et non travaillés :" }</h1>
-                </div>
-                <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
-                      onsubmit={ctx.link().callback(|e: SubmitEvent| {
-                          e.prevent_default();
-                          Msg::Submit
-                      })}>
-                    <table class="table-auto mb-4">
-                        <thead>
-                            <tr class="bg-orange-100">
-                                <th class="px-4 py-2">{ "Mois" }</th>
-                                <th class="px-4 py-2">{ "Nombre de jours" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border px-4 py-2">{ "Janvier" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés jan."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateJan(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Février" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés fév."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateFev(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Mars" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés mar."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateMar(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Avril" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés avr."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateAvr(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Mai" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés mai."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateMai(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Juin" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés juin"
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateJuin(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Juillet" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés juil."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateJui(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Aout" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés aout."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateAout(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Septembre" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés sept."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateSept(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Octobre" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés oct."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateOct(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Novembre" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés nov."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateNov(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr class="bg-gray-100">
-                                <td class="border px-4 py-2">{ "Décembre" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                        type="text"
-                                        placeholder="Jours travaillés déc."
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateDec(input.value())
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="mb-2 text-center text-sm font-semibold text-gray-700">
-                      { "Il vous reste " }
-                      <div class="text-red-500">
-                        { self.total }
-                      </div>
-                      <div class="mb-2 text-center text-sm font-semibold text-gray-700">
-                        {"jours a positionner"}
-                      </div>
+            <>
+                <div class="w-full max-w-md mx-auto">
+                    <div class="text-center text-gray-600 text-4xl font-semibold">
+                        <h1>{ "Étape 3" }</h1>
                     </div>
-                    //total = 12 ? need to be 0 to submit form
-                    {
-                        if let Some(ref message) = self.oth_err {
-                            html! {
-                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
-                                    { message }
-                                </div>
+                    <div class="text-center text-gray-600 text-2xl font-semibold m-2">
+                        <h1>{ "Cette section calcule les jours travaillés et non travaillés :" }</h1>
+                    </div>
+                    <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+                        onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                            e.prevent_default();
+                            Msg::Submit
+                        })}>
+                        <table class="table-auto mb-4">
+                            <thead>
+                                <tr class="bg-orange-100">
+                                    <th class="px-4 py-2">{ "Mois" }</th>
+                                    <th class="px-4 py-2">{ "Nombre de jours" }</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Janvier" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.jan.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateJan(value),
+                                                    Err(_) => Msg::UpdateJan(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Février" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.fev.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateFev(value),
+                                                    Err(_) => Msg::UpdateFev(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Mars" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.mar.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateMar(value),
+                                                    Err(_) => Msg::UpdateMar(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Avril" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.avr.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateAvr(value),
+                                                    Err(_) => Msg::UpdateAvr(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Mai" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.mai.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateMai(value),
+                                                    Err(_) => Msg::UpdateMai(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Juin" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.juin.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateJuin(value),
+                                                    Err(_) => Msg::UpdateJuin(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Juillet" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.jui.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateJui(value),
+                                                    Err(_) => Msg::UpdateJui(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Août" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.aout.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateAout(value),
+                                                    Err(_) => Msg::UpdateAout(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Septembre" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.sept.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateSept(value),
+                                                    Err(_) => Msg::UpdateSept(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Octobre" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.oct.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateOct(value),
+                                                    Err(_) => Msg::UpdateOct(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Novembre" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.nov.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateNov(value),
+                                                    Err(_) => Msg::UpdateNov(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border px-4 py-2">{ "Décembre" }</td>
+                                    <td class="border px-4 py-2">
+                                        <input
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            type="text"
+                                            value={self.dec.to_string()}
+                                            oninput={ctx.link().callback(|e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateDec(value),
+                                                    Err(_) => Msg::UpdateDec(0),
+                                                }
+                                            })}
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                            { "Il vous reste " }
+                            <div class="text-red-500">
+                                { self.total }
+                            </div>
+                            <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                                {"jours à positionner"}
+                            </div>
+                        </div>
+                        {
+                            if let Some(ref message) = self.oth_err {
+                                html! {
+                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                        { message }
+                                    </div>
+                                }
+                            } else {
+                                html! { <></> }
                             }
-                        } else {
-                            html! { <></> }
                         }
-                    }
-                    <div class="flex items-center justify-center">
-                        <button class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                type="submit"
-                                disabled={self.submitted || disabled}
-                        >
-                            { "Soumettre" }
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </>
-    }
+                        <div class="flex items-center justify-center">
+                            <button class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="submit"
+                                    disabled={self.submitted || disabled}
+                            >
+                                { "Soumettre" }
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </>
+        }
     }
 
     fn view_box_title(&self) -> Html {
@@ -851,14 +891,6 @@ impl FormEntreprise {
         html! {
             <div class="mb-4 text-xl font-bold text-center text-gray-700">
                 { "Décompte des Jours Travaillés et Non Travaillés" }
-            </div>
-        }
-    }
-
-    fn view_form_trois(&self) -> Html {
-        html! {
-            <div class="mb-4 text-xl font-bold text-center text-gray-700">
-                { "Répartition des Jours Travaillés À l'Année" }
             </div>
         }
     }
@@ -878,4 +910,3 @@ impl FormEntreprise {
         }
     }
 }
-

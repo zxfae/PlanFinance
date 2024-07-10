@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -121,21 +122,38 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetEntreprise(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("user_id")
-	if id == "" {
-		http.Error(w, "Missing entreprise user_ID", http.StatusBadRequest)
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user_id", http.StatusBadRequest)
 		return
 	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
 	var entreprise Entreprises
-	err := Db.QueryRow("SELECT * FROM Entreprises WHERE user_id = ?", id).Scan(&entreprise.ID, &entreprise.Name, &entreprise.Date, &entreprise.Codeape, &entreprise.Status, &entreprise.UserID)
+	err = Db.QueryRow(
+		`SELECT id, user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp 
+		 FROM Entreprises 
+		 WHERE user_id = ?`, userID,
+	).Scan(
+		&entreprise.ID, &entreprise.UserID, &entreprise.Name, &entreprise.Date, &entreprise.Codeape, &entreprise.Status,
+		&entreprise.Jrsttx, &entreprise.Jrsweek, &entreprise.Jrsferies, &entreprise.Jrscp,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Entreprise not found", http.StatusNotFound)
 		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entreprise)
+	if err := json.NewEncoder(w).Encode(entreprise); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+	}
 }

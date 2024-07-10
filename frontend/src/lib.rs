@@ -6,7 +6,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use home::FormModel;
 use next::FormEntreprise;
-use stepone::StepOne;
+use stepone::StepTwo;
 use wasm_bindgen::prelude::*;
 
 //Handling routes
@@ -16,8 +16,8 @@ enum AppRoute {
     Home,
     #[at("/success")]
     FormEntreprise,
-    #[at("/step_one")]
-    StepOne,
+    #[at("/successed")]
+    StepTwo,
 }
 
 #[function_component(App)]
@@ -33,7 +33,7 @@ fn switch(routes: AppRoute) -> Html {
     match routes {
         AppRoute::Home => html! { <FormModel /> },
         AppRoute::FormEntreprise => html! { <FormEntreprise /> },
-        AppRoute::StepOne => html! { <StepOne /> },
+        AppRoute::StepTwo => html! { <StepTwo /> },
     }
 }
 #[wasm_bindgen(start)]

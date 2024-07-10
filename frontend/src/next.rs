@@ -1,11 +1,12 @@
 use yew::prelude::*;
+use yew_router::prelude::*;
 use web_sys::HtmlInputElement;
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
+#[warn(unused_imports)]
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
-use crate::header;
-use crate::footer;
+use crate::{AppRoute, header, footer};
 extern crate regex;
 use regex::Regex;
 
@@ -340,13 +341,8 @@ impl Component for FormEntreprise {
             }
             Msg::SubmissionComplete(new_ent) => {
                 log::info!("Submission completed. Entreprise ID: {}", new_ent.id);
-                web_sys::window()
-                    .unwrap()
-                    .local_storage()
-                    .unwrap()
-                    .unwrap()
-                    .set_item("ent_id", &new_ent.id.to_string())
-                    .unwrap();
+                let navigator = ctx.link().navigator().unwrap();
+                navigator.push(&AppRoute::StepTwo);
                 true
             }
         }
@@ -354,9 +350,7 @@ impl Component for FormEntreprise {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         log::info!("Rendering view. Submitted: {}", self.submitted);
-        if self.submitted {
-            self.success(ctx)
-        } else {
+
             html! {
                 <div class="flex flex-col min-h-screen">
                     { header() }
@@ -396,7 +390,6 @@ impl Component for FormEntreprise {
                     { footer() }
                 </div>
             }
-        }
     }
 }
 
@@ -892,18 +885,4 @@ impl FormEntreprise {
         }
     }
 
-    fn success(&self, _ctx: &Context<Self>) -> Html {
-        html! {
-            <div class="flex flex-col min-h-screen justify-center items-center">
-                { header() }
-                <div class="flex flex-col flex-grow justify-center items-center">
-                    <p class="text-3xl font-serif text-gray-900 mb-4">{ "Votre projet a été soumis avec succès." }</p>
-                    <a href="/" class="mt-4 bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        { "Retour" }
-                    </a>
-                </div>
-                { footer() }
-            </div>
-        }
-    }
 }

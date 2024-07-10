@@ -26,12 +26,21 @@ async fn success() -> impl Responder {
         .body(html)
 }
 
+#[get("/successed")]
+async fn successed() -> impl Responder {
+    let html = std::fs::read_to_string("./frontend/static/index.html").unwrap();
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(html)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .service(index)
             .service(success)
+            .service(successed)
             .service(get_users)
             .service(fs::Files::new("/static/pkg", "./frontend/pkg").show_files_listing())
             .service(fs::Files::new("/static", "./frontend/static").show_files_listing())

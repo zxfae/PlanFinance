@@ -73,3 +73,38 @@ func AddEntreprise(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ent)
 }
+
+func AddActivites(w http.ResponseWriter, r *http.Request) {
+	var act Activites
+	err := json.NewDecoder(r.Body).Decode(&act)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation) VALUES(?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//Log for get ID and compare with ID user
+	act.ID = int(id)
+	log.Printf("Act inserted with ID: %d\n", act.ID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(act)
+}

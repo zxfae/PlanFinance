@@ -5,27 +5,39 @@ use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct StepTwoo {
+    id: i32,
+    user_id: i32,
+    production: i32,
+    entretien: i32,
+    clientele: i32,
+    interprofesion: i32,
+    formation: i32,
+}
+
 pub struct StepTwo {
-    last_name: String,
-    first_name: String,
+    user_id: Option<i32>,
+    production: i32,
+    entretien: i32,
+    clientele: i32,
+    interprofesion: i32,
+    formation: i32,
     entreprise: Option<Entreprise>,
+    clone_jrsttx: Option<i32>,
     submitted: bool,
 }
 
 pub enum Msg {
-    UpdateLastName(String),
-    UpdateFirstName(String),
+    UpdateProduction(i32),
+    UpdateEntretien(i32),
+    UpdateClientele(i32),
+    UpdateInterprofession(i32),
+    UpdateFormation(i32),
     Submit,
-    SubmissionComplete(User),
+    SubmissionComplete(StepTwoo),
     LoadEntreprise(Entreprise),
     LoadEntrepriseError,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct User {
-    id: i32,
-    lastname: String,
-    firstname: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -37,21 +49,6 @@ pub struct Entreprise {
     codeape: String,
     status: String,
     jrsttx: i32,
-    jrsweek: i16,
-    jrsferies: i8,
-    jrscp: i8,
-    jan: i8,
-    fev: i8,
-    mar: i8,
-    avr: i8,
-    mai: i8,
-    juin: i8,
-    jui: i8,
-    aout: i8,
-    sept: i8,
-    oct: i8,
-    nov: i8,
-    dec: i8,
 }
 
 impl Component for StepTwo {
@@ -71,7 +68,6 @@ impl Component for StepTwo {
             .and_then(|id| id.parse::<i32>().ok());
 
         if let Some(user_id) = user_id {
-            // Récupérer les données de l'entreprise depuis l'API
             ctx.link().send_future(async move {
                 let url = format!("http://localhost:8080/get_ent?user_id={}", user_id);
                 let response = Request::get(&url).send().await.unwrap();
@@ -86,45 +82,80 @@ impl Component for StepTwo {
         }
 
         Self {
-            last_name: String::new(),
-            first_name: String::new(),
+            user_id,
+            production: 0,
+            entretien: 0,
+            clientele: 0,
+            interprofesion: 0,
+            formation: 0,
             entreprise: None,
+            clone_jrsttx: None,
             submitted: false,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::UpdateLastName(value) => {
-                self.last_name = value;
+            Msg::UpdateProduction(value) => {
+                self.production = value;
                 true
             }
-            Msg::UpdateFirstName(value) => {
-                self.first_name = value;
+            Msg::UpdateEntretien(value) => {
+                self.entretien = value;
+                true
+            }
+            Msg::UpdateClientele(value) => {
+                self.clientele = value;
+                true
+            }
+            Msg::UpdateInterprofession(value) => {
+                self.interprofesion = value;
+                true
+            }
+            Msg::UpdateFormation(value) => {
+                self.formation = value;
                 true
             }
             Msg::Submit => {
                 if !self.submitted {
-                    let user = User {
+                    let activities = StepTwoo {
                         id: 0,
-                        lastname: self.last_name.clone(),
-                        firstname: self.first_name.clone(),
+                        user_id: self.user_id.unwrap_or_default(),
+                        production: self.production,
+                        entretien: self.entretien,
+                        clientele: self.clientele,
+                        interprofesion: self.interprofesion,
+                        formation: self.formation,
                     };
-                    let user_json = serde_json::to_string(&user).unwrap();
-                    log::info!("Submitting user: {}", user_json);
+                    let activities_json = serde_json::to_string(&activities).unwrap();
+                    log::info!("Submitting activities: {}", activities_json);
                     ctx.link().send_future(async {
-                        let response = Request::post("http://localhost:8080/add_user")
+                        let response = Request::post("http://localhost:8080/add_act")
                             .header("Content-Type", "application/json")
-                            .body(user_json)
+                            .body(activities_json)
                             .send()
-                            .await
-                            .unwrap();
+                            .await;
 
-                        if response.ok() {
-                            let new_user: User = response.json().await.unwrap();
-                            Msg::SubmissionComplete(new_user)
-                        } else {
-                            Msg::Submit
+                        match response {
+                            Ok(resp) => {
+                                if resp.ok() {
+                                    let new_activities: Result<StepTwoo, _> = resp.json().await;
+                                    match new_activities {
+                                        Ok(new_activities) => Msg::SubmissionComplete(new_activities),
+                                        Err(e) => {
+                                            log::error!("Failed to parse response: {:?}", e);
+                                            Msg::Submit
+                                        }
+                                    }
+                                } else {
+                                    log::error!("Failed to submit activities: {}", resp.status());
+                                    Msg::Submit
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Request failed: {:?}", e);
+                                Msg::Submit
+                            }
                         }
                     });
                     self.submitted = true;
@@ -133,20 +164,21 @@ impl Component for StepTwo {
                     false
                 }
             }
-            Msg::SubmissionComplete(new_user) => {
+            Msg::SubmissionComplete(new_activities) => {
                 log::info!("Submission completed.");
                 web_sys::window()
                     .unwrap()
                     .local_storage()
                     .unwrap()
                     .unwrap()
-                    .set_item("user_id", &new_user.id.to_string())
+                    .set_item("user_id", &new_activities.id.to_string())
                     .unwrap();
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::FormEntreprise);
                 true
             }
             Msg::LoadEntreprise(entreprise) => {
+                self.clone_jrsttx = Some(entreprise.jrsttx);
                 self.entreprise = Some(entreprise);
                 true
             }
@@ -163,48 +195,116 @@ impl Component for StepTwo {
                 { header() }
                 <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
                     <div class="drop-shadow-md text-center text-gray-600 text-4xl font-semibold mb-20">
-                        <h1>{ "Proposer, c'est possible !" }</h1>
+                        <h1>{ "Répartition Temps de Travail / d'activité" }</h1>
                         <div class="text-center text-gray-600 text-2xl font-semibold m-2">
                             <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
                         </div>
                     </div>
+                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="px-4 py-2">{ "Répartition temps d'activité" }</th>
+                                <th class="px-4 py-2">{ "Nombre de jours" }</th>
+                                <th class="px-4 py-2">{ "Jours travaillés" }</th>
+                                <th class="px-4 py-2">{ "Pourcentage" }</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Production - vente = CA" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="number"
+                                        value={self.production.to_string()}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Entretien / Maintenance ..." }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="number"
+                                        value={self.entretien.to_string()}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Gestion clients, Devis, Facture..." }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="number"
+                                        value={self.clientele.to_string()}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateClientele(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Interprofession" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="number"
+                                        value={self.interprofesion.to_string()}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateInterprofession(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Formation" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="number"
+                                        value={self.formation.to_string()}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateFormation(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">
+                                    { self.view_cloned_jrsttx() }
+                                </td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "..." }</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <div class="w-full max-w-md">
                         <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
                             Msg::Submit
                         })}>
-                            <div class="mb-4">
-                                { self.view_box_title() }
-                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="last_name">{ "Nom" }</label>
-                                <input
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                    id="last_name"
-                                    type="text"
-                                    placeholder="Entrez votre nom"
-                                    value={self.last_name.clone()}
-                                    oninput={ctx.link().callback(|e: InputEvent| {
-                                        let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateLastName(input.value())
-                                    })}
-                                    required=true
-                                />
-                            </div>
-                            <div class="mb-6">
-                                <label class="block text-orange-500 text-sm font-semibold mb-2" for="first_name">{ "Prénom" }</label>
-                                <input
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                    id="first_name"
-                                    type="text"
-                                    placeholder="Entrez votre prénom"
-                                    value={self.first_name.clone()}
-                                    oninput={ctx.link().callback(|e: InputEvent| {
-                                        let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateFirstName(input.value())
-                                    })}
-                                    required=true
-                                />
-                            </div>
-                            { self.view_entreprise_info() }
                             <div class="flex items-center justify-center">
                                 <button
                                     class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -224,27 +324,9 @@ impl Component for StepTwo {
 }
 
 impl StepTwo {
-    fn view_box_title(&self) -> Html {
-        html! {
-            <div class="text-center text-xl font-semibold mb-4">
-                <h1 class="text-gray-700">{ "Je simule mon business plan" }</h1>
-            </div>
-        }
-    }
-
-    fn view_entreprise_info(&self) -> Html {
-        if let Some(ref entreprise) = self.entreprise {
-            html! {
-                <div class="mb-4">
-                    <h2 class="text-xl font-semibold text-gray-700">{ "Détails de l'entreprise" }</h2>
-                    <p class="text-gray-700">{ format!("Nom: {}", entreprise.name) }</p>
-                    <p class="text-gray-700">{ format!("Date: {}", entreprise.date) }</p>
-                    <p class="text-gray-700">{ format!("Code APE: {}", entreprise.codeape) }</p>
-                    <p class="text-gray-700">{ format!("Statut: {}", entreprise.status) }</p>
-                    <p class="text-gray-700">{ format!("Jours travaillees: {}", entreprise.jrsttx) }</p>
-
-                </div>
-            }
+    fn view_cloned_jrsttx(&self) -> Html {
+        if let Some(cloned_jrsttx) = self.clone_jrsttx {
+            html! { <p class="text-gray-700">{ format!("Jours travaillés clonés: {}", cloned_jrsttx) }</p> }
         } else {
             html! { <></> }
         }

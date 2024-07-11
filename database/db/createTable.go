@@ -44,3 +44,19 @@ func CreateTableEntreprise(db *sql.DB) error {
 	_, err := db.Exec(table)
 	return err
 }
+
+func CreateTableActivite(db *sql.DB) error {
+	table := `
+	CREATE TABLE IF NOT EXISTS Activites(
+		id INTEGER PRIMARY KEY,
+		user_id INTEGER,
+		production INTEGER,
+		entretien INTEGER,
+		clientele INTEGER,
+		interprofession INTEGER,
+		formation INTEGER,
+		FOREIGN KEY(user_id) REFERENCES Users(id)
+	)`
+	_, err := db.Exec(table)
+	return err
+}

@@ -12,7 +12,7 @@ pub struct StepTwoo {
     production: i32,
     entretien: i32,
     clientele: i32,
-    interprofesion: i32,
+    interprofession: i32,
     formation: i32,
 }
 
@@ -21,7 +21,7 @@ pub struct StepTwo {
     production: i32,
     entretien: i32,
     clientele: i32,
-    interprofesion: i32,
+    interprofession: i32,
     formation: i32,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
@@ -86,7 +86,7 @@ impl Component for StepTwo {
             production: 0,
             entretien: 0,
             clientele: 0,
-            interprofesion: 0,
+            interprofession: 0,
             formation: 0,
             entreprise: None,
             clone_jrsttx: None,
@@ -109,7 +109,7 @@ impl Component for StepTwo {
                 true
             }
             Msg::UpdateInterprofession(value) => {
-                self.interprofesion = value;
+                self.interprofession = value;
                 true
             }
             Msg::UpdateFormation(value) => {
@@ -124,7 +124,7 @@ impl Component for StepTwo {
                         production: self.production,
                         entretien: self.entretien,
                         clientele: self.clientele,
-                        interprofesion: self.interprofesion,
+                        interprofession: self.interprofession,
                         formation: self.formation,
                     };
                     let activities_json = serde_json::to_string(&activities).unwrap();
@@ -200,7 +200,7 @@ impl Component for StepTwo {
                             <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
                         </div>
                     </div>
-                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900">
+                    <table class=" mb-4 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
                             <tr class="bg-orange-100">
                                 <th class="px-4 py-2">{ "Répartition temps d'activité" }</th>
@@ -215,7 +215,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="number"
+                                        type="text"
                                         value={self.production.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
@@ -231,7 +231,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="number"
+                                        type="text"
                                         value={self.entretien.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
@@ -247,7 +247,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="number"
+                                        type="text"
                                         value={self.clientele.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
@@ -256,15 +256,15 @@ impl Component for StepTwo {
                                     />
                                 </td>
                                 <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "Interprofession" }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="number"
-                                        value={self.interprofesion.to_string()}
+                                        type="text"
+                                        value={self.interprofession.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             Msg::UpdateInterprofession(input.value().parse().unwrap_or(0))
@@ -272,14 +272,14 @@ impl Component for StepTwo {
                                     />
                                 </td>
                                 <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "Formation" }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="number"
+                                        type="text"
                                         value={self.formation.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
@@ -288,7 +288,7 @@ impl Component for StepTwo {
                                     />
                                 </td>
                                 <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ "auto" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "" }</td>
@@ -300,6 +300,130 @@ impl Component for StepTwo {
                             </tr>
                         </tbody>
                     </table>
+
+                    <hr class="my-4 border-t-2 border-gray-300 w-2/4" />
+
+                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="px-4 py-2">{ "Prestation" }</th>
+                                <th class="px-4 py-2">{ "Production/Encaissement" }</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Production - Encaissement / jour" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Nouveau"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Production - Encaissement / an" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Auto"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+            <hr class="my-4 border-t-2 border-gray-300 w-2/4" />
+
+                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="px-4 py-2">{ "Moyenne prix de vente" }</th>
+                                <th class="px-4 py-2">{ "HT" }</th>
+                                <th class="px-4 py-2">{ "TVA" }</th>
+                                <th class="px-4 py-2">{ "TTC" }</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-4 py-2">{ "TVA applicable" }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Nouveau"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let     input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Moyenne prix de vente" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Nouveau"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "auto" }</td>
+                                <td class="border px-4 py-2">{ "auto" }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "CA journalier" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Auto"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">{ "" }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "CA annuel" }</td>
+                                <td class="border px-4 py-2">
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={"Auto"}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ "auto" }</td>
+                                <td class="border px-4 py-2">{ "auto" }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
                     <div class="w-full max-w-md">
                         <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();

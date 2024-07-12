@@ -37,6 +37,8 @@ pub struct StepTwo {
     caann: i64,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
+    pourcentagejrsent: i32,
+    pourcetagenon: i32,
     submitted: bool,
 }
 
@@ -52,6 +54,8 @@ pub enum Msg {
     UpdateMoyPrix(i64),
     UpdateCaJour(i64),
     UpdateCaAnn(i64),
+    CalculatePouJTTX,
+    CalculePourNon,
     Submit,
     SubmissionComplete(StepTwoo),
     LoadEntreprise(Entreprise),
@@ -67,6 +71,9 @@ pub struct Entreprise {
     codeape: String,
     status: String,
     jrsttx: i32,
+    jrsweek: i16,
+    jrsferies: i8,
+    jrscp: i8,
 }
 
 impl Component for StepTwo {
@@ -74,7 +81,6 @@ impl Component for StepTwo {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        // Récupérer l'ID de l'utilisateur depuis le local storage
         let user_id = web_sys::window()
             .unwrap()
             .local_storage()
@@ -106,14 +112,16 @@ impl Component for StepTwo {
             clientele: 0,
             interprofession: 0,
             formation: 0,
-            prodjour:0,
-            prodan:0,
-            tva:0,
-            moyprix:0,
-            cajour:0,
-            caann:0,
+            prodjour: 0,
+            prodan: 0,
+            tva: 0,
+            moyprix: 0,
+            cajour: 0,
+            caann: 0,
             entreprise: None,
             clone_jrsttx: None,
+            pourcentagejrsent:0,
+            pourcetagenon:0,
             submitted: false,
         }
     }
@@ -122,46 +130,79 @@ impl Component for StepTwo {
         match msg {
             Msg::UpdateProduction(value) => {
                 self.production = value;
+                ctx.link().send_message(Msg::CalculatePouJTTX);
                 true
             }
             Msg::UpdateEntretien(value) => {
                 self.entretien = value;
+                ctx.link().send_message(Msg::CalculePourNon);
                 true
             }
             Msg::UpdateClientele(value) => {
                 self.clientele = value;
+                ctx.link().send_message(Msg::CalculePourNon);
                 true
             }
             Msg::UpdateInterprofession(value) => {
                 self.interprofession = value;
+                ctx.link().send_message(Msg::CalculePourNon);
                 true
             }
             Msg::UpdateFormation(value) => {
                 self.formation = value;
+                ctx.link().send_message(Msg::CalculePourNon);
                 true
             }
-            Msg::UpdateProdjour(value)=>{
+            Msg::UpdateProdjour(value) => {
                 self.prodjour = value;
                 true
             }
-            Msg::UpdateProdan(value)=>{
+            Msg::UpdateProdan(value) => {
                 self.prodan = value;
                 true
             }
-            Msg::UpdateTva(value)=>{
+            Msg::UpdateTva(value) => {
                 self.tva = value;
                 true
             }
-            Msg::UpdateMoyPrix(value)=>{
-                self.moyprix= value;
+            Msg::UpdateMoyPrix(value) => {
+                self.moyprix = value;
                 true
             }
-            Msg::UpdateCaJour(value)=>{
+            Msg::UpdateCaJour(value) => {
                 self.cajour = value;
                 true
             }
-            Msg::UpdateCaAnn(value)=>{
+            Msg::UpdateCaAnn(value) => {
                 self.caann = value;
+                true
+            }
+            Msg::CalculatePouJTTX => {
+                if let Some(clone_jrsttx) = self.clone_jrsttx {
+                    if clone_jrsttx != 0 {
+                        self.pourcentagejrsent = self.production * 100 / clone_jrsttx;
+                    } else {
+                        log::warn!("Pas de divsion possible, jrsttx == 0");
+                        self.pourcentagejrsent = 0;
+                    }
+                } else {
+                    log::warn!("clone_jrsttx == none");
+                    self.pourcentagejrsent = 0;
+                }
+                true
+            }
+            Msg::CalculePourNon => {
+                if let Some(clone_jrsttx) = self.clone_jrsttx{
+                    if clone_jrsttx != 0{
+                        self.pourcetagenon = (self.entretien + self.clientele + self.interprofession + self.formation) * 100 / clone_jrsttx;
+                    } else {
+                        log::warn!("Pas de divsion possible, jrsttx == 0");
+                        self.pourcetagenon = 0;
+                    }
+                } else {
+                    log::warn!("clone_jrsttx == none");
+                    self.pourcetagenon = 0;
+                }
                 true
             }
             Msg::Submit => {
@@ -174,12 +215,12 @@ impl Component for StepTwo {
                         clientele: self.clientele,
                         interprofession: self.interprofession,
                         formation: self.formation,
-                        prodjour:self.prodjour,
-                        prodan:self.prodan,
-                        tva:self.tva,
-                        moyprix:self.moyprix,
-                        cajour:self.cajour,
-                        caann:self.caann,
+                        prodjour: self.prodjour,
+                        prodan: self.prodan,
+                        tva: self.tva,
+                        moyprix: self.moyprix,
+                        cajour: self.cajour,
+                        caann: self.caann,
                     };
                     let activities_json = serde_json::to_string(&activities).unwrap();
                     log::info!("Submitting activities: {}", activities_json);
@@ -259,7 +300,7 @@ impl Component for StepTwo {
                             <tr class="bg-orange-100">
                                 <th class="px-4 py-2">{ "Répartition temps d'activité" }</th>
                                 <th class="px-4 py-2">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2">{ "Jours travaillés" }</th>
+                                <th class="px-4 py-2">{ "Jours en Entreprise" }</th>
                                 <th class="px-4 py-2">{ "Pourcentage" }</th>
                             </tr>
                         </thead>
@@ -280,9 +321,10 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{ {self.production.to_string()} }</td>
+                                <td class="border px-4 py-2">{ self.pourcentagejrsent.to_string() }{"%"}</td>
                             </tr>
+            <hr class="my-1 border-t-2 border-orange-400 w-full" />
                             <tr>
                                 <td class="border px-4 py-2">{ "Entretien / Maintenance ..." }</td>
                                 <td class="border px-4 py-2">
@@ -299,8 +341,8 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{{self.entretien.to_string()}}</td>
+                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "Gestion clients, Devis, Facture..." }</td>
@@ -318,7 +360,7 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{{self.clientele.to_string()}}</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
@@ -337,7 +379,7 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{{self.interprofession.to_string()}}</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
@@ -356,16 +398,16 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "auto" }</td>
+                                <td class="border px-4 py-2">{{self.formation.to_string()}}</td>
+                                <td class="border px-4 py-2">{{self.pourcetagenon.to_string()}}{"%"}</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">
-                                    { self.view_cloned_jrsttx() }
+                                    {""}
                                 </td>
-                                <td class="border px-4 py-2">{ "..." }</td>
-                                <td class="border px-4 py-2">{ "..." }</td>
+                                <td class="border px-4 py-2">{{ self.view_cloned_jrsttx() }}</td>
+                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                         </tbody>
                     </table>
@@ -396,8 +438,6 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "" }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "Production - Encaissement / an" }</td>
@@ -405,7 +445,7 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={self.prodan.to_string()}
+                                        value={"Auto"}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
@@ -415,8 +455,6 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ "" }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                         </tbody>
                     </table>
@@ -442,7 +480,7 @@ impl Component for StepTwo {
                                         type="text"
                                         value={self.tva.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
-                                            let     input: HtmlInputElement = e.target_unchecked_into();
+                                            let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i8>() {
                                                     Ok(value) => Msg::UpdateTva(value),
                                                     Err(_) => Msg::UpdateTva(0),
@@ -538,9 +576,20 @@ impl Component for StepTwo {
 impl StepTwo {
     fn view_cloned_jrsttx(&self) -> Html {
         if let Some(cloned_jrsttx) = self.clone_jrsttx {
-            html! { <p class="text-gray-700">{ format!("Jours travaillés clonés: {}", cloned_jrsttx) }</p> }
+            if let Some(ref entreprise) = self.entreprise {
+                html! {
+                    <p class="text-gray-700">
+                        { format!(
+                            "Jours travaillés: {}",
+                            cloned_jrsttx - (entreprise.jrsweek as i32) - (entreprise.jrscp as i32) - (entreprise.jrsferies as i32)
+                        ) }
+                    </p>
+                }
+            } else {
+                html! { <p class="text-gray-700">{ "Loading entreprise data..." }</p> }
+            }
         } else {
-            html! { <></> }
+            html! { <p class="text-gray-700">{ "No cloned jrsttx available" }</p> }
         }
     }
 }

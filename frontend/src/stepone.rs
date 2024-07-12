@@ -14,6 +14,12 @@ pub struct StepTwoo {
     clientele: i32,
     interprofession: i32,
     formation: i32,
+    prodjour: i64,
+    prodan: i64,
+    tva: i8,
+    moyprix: i64,
+    cajour: i64,
+    caann: i64,
 }
 
 pub struct StepTwo {
@@ -23,6 +29,12 @@ pub struct StepTwo {
     clientele: i32,
     interprofession: i32,
     formation: i32,
+    prodjour: i64,
+    prodan: i64,
+    tva: i8,
+    moyprix: i64,
+    cajour: i64,
+    caann: i64,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
     submitted: bool,
@@ -34,6 +46,12 @@ pub enum Msg {
     UpdateClientele(i32),
     UpdateInterprofession(i32),
     UpdateFormation(i32),
+    UpdateProdjour(i64),
+    UpdateProdan(i64),
+    UpdateTva(i8),
+    UpdateMoyPrix(i64),
+    UpdateCaJour(i64),
+    UpdateCaAnn(i64),
     Submit,
     SubmissionComplete(StepTwoo),
     LoadEntreprise(Entreprise),
@@ -88,6 +106,12 @@ impl Component for StepTwo {
             clientele: 0,
             interprofession: 0,
             formation: 0,
+            prodjour:0,
+            prodan:0,
+            tva:0,
+            moyprix:0,
+            cajour:0,
+            caann:0,
             entreprise: None,
             clone_jrsttx: None,
             submitted: false,
@@ -116,6 +140,30 @@ impl Component for StepTwo {
                 self.formation = value;
                 true
             }
+            Msg::UpdateProdjour(value)=>{
+                self.prodjour = value;
+                true
+            }
+            Msg::UpdateProdan(value)=>{
+                self.prodan = value;
+                true
+            }
+            Msg::UpdateTva(value)=>{
+                self.tva = value;
+                true
+            }
+            Msg::UpdateMoyPrix(value)=>{
+                self.moyprix= value;
+                true
+            }
+            Msg::UpdateCaJour(value)=>{
+                self.cajour = value;
+                true
+            }
+            Msg::UpdateCaAnn(value)=>{
+                self.caann = value;
+                true
+            }
             Msg::Submit => {
                 if !self.submitted {
                     let activities = StepTwoo {
@@ -126,6 +174,12 @@ impl Component for StepTwo {
                         clientele: self.clientele,
                         interprofession: self.interprofession,
                         formation: self.formation,
+                        prodjour:self.prodjour,
+                        prodan:self.prodan,
+                        tva:self.tva,
+                        moyprix:self.moyprix,
+                        cajour:self.cajour,
+                        caann:self.caann,
                     };
                     let activities_json = serde_json::to_string(&activities).unwrap();
                     log::info!("Submitting activities: {}", activities_json);
@@ -219,7 +273,10 @@ impl Component for StepTwo {
                                         value={self.production.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i32>() {
+                                                    Ok(value) => Msg::UpdateProduction(value),
+                                                    Err(_) => Msg::UpdateProduction(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -235,7 +292,10 @@ impl Component for StepTwo {
                                         value={self.entretien.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i32>() {
+                                                    Ok(value) => Msg::UpdateEntretien(value),
+                                                    Err(_) => Msg::UpdateEntretien(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -251,7 +311,10 @@ impl Component for StepTwo {
                                         value={self.clientele.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateClientele(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i32>() {
+                                                    Ok(value) => Msg::UpdateClientele(value),
+                                                    Err(_) => Msg::UpdateClientele(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -267,7 +330,10 @@ impl Component for StepTwo {
                                         value={self.interprofession.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateInterprofession(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i32>() {
+                                                    Ok(value) => Msg::UpdateInterprofession(value),
+                                                    Err(_) => Msg::UpdateInterprofession(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -283,7 +349,10 @@ impl Component for StepTwo {
                                         value={self.formation.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateFormation(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i32>() {
+                                                    Ok(value) => Msg::UpdateFormation(value),
+                                                    Err(_) => Msg::UpdateFormation(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -301,7 +370,7 @@ impl Component for StepTwo {
                         </tbody>
                     </table>
 
-                    <hr class="my-4 border-t-2 border-gray-300 w-2/4" />
+                    <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
 
                     <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
@@ -317,10 +386,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Nouveau"}
+                                        value={self.prodjour.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i64>() {
+                                                    Ok(value) => Msg::UpdateProdjour(value),
+                                                    Err(_) => Msg::UpdateProdjour(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -333,10 +405,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Auto"}
+                                        value={self.prodan.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i64>() {
+                                                    Ok(value) => Msg::UpdateProdan(value),
+                                                    Err(_) => Msg::UpdateProdan(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -345,7 +420,8 @@ impl Component for StepTwo {
                             </tr>
                         </tbody>
                     </table>
-            <hr class="my-4 border-t-2 border-gray-300 w-2/4" />
+
+                    <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
 
                     <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
@@ -364,10 +440,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Nouveau"}
+                                        value={self.tva.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let     input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i8>() {
+                                                    Ok(value) => Msg::UpdateTva(value),
+                                                    Err(_) => Msg::UpdateTva(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -379,10 +458,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Nouveau"}
+                                        value={self.moyprix.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateProduction(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i64>() {
+                                                    Ok(value) => Msg::UpdateMoyPrix(value),
+                                                    Err(_) => Msg::UpdateMoyPrix(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -395,10 +477,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Auto"}
+                                        value={self.cajour.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i64>() {
+                                                    Ok(value) => Msg::UpdateCaJour(value),
+                                                    Err(_) => Msg::UpdateCaJour(0),
+                                            }
                                         })}
                                     />
                                 </td>
@@ -411,10 +496,13 @@ impl Component for StepTwo {
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
-                                        value={"Auto"}
+                                        value={self.caann.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            Msg::UpdateEntretien(input.value().parse().unwrap_or(0))
+                                            match input.value().parse::<i64>() {
+                                                    Ok(value) => Msg::UpdateCaAnn(value),
+                                                    Err(_) => Msg::UpdateCaAnn(0),
+                                            }
                                         })}
                                     />
                                 </td>

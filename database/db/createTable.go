@@ -55,6 +55,12 @@ func CreateTableActivite(db *sql.DB) error {
 		clientele INTEGER,
 		interprofession INTEGER,
 		formation INTEGER,
+		prodjour INTEGER,
+		prodan INTEGER,
+		tva INTEGER,
+		moyprix INTEGER,
+		cajour INTEGER,
+		caann INTEGER,
 		FOREIGN KEY(user_id) REFERENCES Users(id)
 	)`
 	_, err := db.Exec(table)

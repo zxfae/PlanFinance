@@ -82,14 +82,14 @@ func AddActivites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation) VALUES(?, ?, ?, ?, ?, ?)")
+	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, cajour, caann) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation)
+	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation, act.Prodjour, act.Prodan, act.Tva, act.Moyprix, act.Cajour, act.Caann)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

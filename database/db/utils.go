@@ -41,4 +41,10 @@ type Activites struct {
 	Clientele       int `json:"clientele"`
 	Interprofession int `json:"interprofession"`
 	Formation       int `json:"formation"`
+	Prodjour        int `json:"prodjour"`
+	Prodan          int `json:"prodan"`
+	Tva             int `json:"tva"`
+	Moyprix         int `json:"moyprix"`
+	Cajour          int `json:"cajour"`
+	Caann           int `json:"caann"`
 }

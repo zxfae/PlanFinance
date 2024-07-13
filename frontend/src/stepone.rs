@@ -75,7 +75,6 @@ pub struct Entreprise {
     jrsferies: i8,
     jrscp: i8,
 }
-
 impl Component for StepTwo {
     type Message = Msg;
     type Properties = ();
@@ -120,8 +119,8 @@ impl Component for StepTwo {
             caann: 0,
             entreprise: None,
             clone_jrsttx: None,
-            pourcentagejrsent:0,
-            pourcetagenon:0,
+            pourcentagejrsent: 0,
+            pourcetagenon: 0,
             submitted: false,
         }
     }
@@ -177,12 +176,13 @@ impl Component for StepTwo {
                 self.caann = value;
                 true
             }
+            //convert to f64 'cause i need to round my value, if not percent are bad
             Msg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
-                        self.pourcentagejrsent = self.production * 100 / clone_jrsttx;
+                        self.pourcentagejrsent = ((self.production as f64) * 100.0 / (clone_jrsttx as f64)).round() as i32;
                     } else {
-                        log::warn!("Pas de divsion possible, jrsttx == 0");
+                        log::warn!("Pas de division possible, jrsttx == 0");
                         self.pourcentagejrsent = 0;
                     }
                 } else {
@@ -192,11 +192,11 @@ impl Component for StepTwo {
                 true
             }
             Msg::CalculePourNon => {
-                if let Some(clone_jrsttx) = self.clone_jrsttx{
-                    if clone_jrsttx != 0{
-                        self.pourcetagenon = (self.entretien + self.clientele + self.interprofession + self.formation) * 100 / clone_jrsttx;
+                if let Some(clone_jrsttx) = self.clone_jrsttx {
+                    if clone_jrsttx != 0 {
+                        self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64) * 100.0 / (clone_jrsttx as f64)).round() as i32;
                     } else {
-                        log::warn!("Pas de divsion possible, jrsttx == 0");
+                        log::warn!("Pas de division possible, jrsttx == 0");
                         self.pourcetagenon = 0;
                     }
                 } else {
@@ -321,10 +321,15 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ {self.production.to_string()} }</td>
-                                <td class="border px-4 py-2">{ self.pourcentagejrsent.to_string() }{"%"}</td>
+                                <td class="border px-4 py-2">{ self.production }</td>
+                                <td class="border px-4 py-2">{""}</td>
                             </tr>
-            <hr class="my-1 border-t-2 border-orange-400 w-full" />
+                            <tr>
+                                <td class="border px-4 py-2">{ "Rentrée d'argent positive" }</td>
+                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border px-4 py-2 text-emerald-600">{ format!("{}%", self.pourcentagejrsent) }</td>
+                            </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "Entretien / Maintenance ..." }</td>
                                 <td class="border px-4 py-2">
@@ -341,7 +346,7 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{{self.entretien.to_string()}}</td>
+                                <td class="border px-4 py-2">{ self.entretien }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
@@ -360,7 +365,7 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{{self.clientele.to_string()}}</td>
+                                <td class="border px-4 py-2">{ self.clientele }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
@@ -379,7 +384,7 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{{self.interprofession.to_string()}}</td>
+                                <td class="border px-4 py-2">{ self.interprofession }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
@@ -398,15 +403,20 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{{self.formation.to_string()}}</td>
-                                <td class="border px-4 py-2">{{self.pourcetagenon.to_string()}}{"%"}</td>
+                                <td class="border px-4 py-2">{ self.formation }</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{ "Rentrée d'argent nulle" }</td>
+                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border px-4 py-2 text-red-600">{ format!("{}%", self.pourcetagenon) }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">
                                     {""}
                                 </td>
-                                <td class="border px-4 py-2">{{ self.view_cloned_jrsttx() }}</td>
+                                <td class="border px-4 py-2">{ self.view_cloned_jrsttx() }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                         </tbody>

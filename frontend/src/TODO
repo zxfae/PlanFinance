@@ -2,5 +2,6 @@ NEXT.rs =>
 regex date
 add at db new column
 (ttx, - cp, - feries, - week)
+//create new err patern for date
 STEPONE.rs =>
 1 - Fix percentage with new value at new column

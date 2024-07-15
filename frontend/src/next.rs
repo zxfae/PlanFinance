@@ -10,11 +10,10 @@ use crate::{AppRoute, header, footer};
 extern crate regex;
 use regex::Regex;
 
+//Rust.doc (-) currentFormat
 pub fn date_test(date: &str) -> bool {
-    let date_regex = r"(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$";
-
-    let re = Regex::new(date_regex).unwrap();
-    re.is_match(date)
+    let date_regex = Regex::new(r"^\d{2}-\d{2}-\d{4}$").unwrap();
+    date_regex.is_match(date)
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -70,6 +69,7 @@ pub struct FormEntreprise {
     decompte: i32,
     total: i32,
     error_msg: Option<String>,
+    date_err:Option<String>,
     oth_err: Option<String>,
 }
 
@@ -148,6 +148,7 @@ impl Component for FormEntreprise {
             decompte: 0,
             total: 0,
             error_msg: None,
+            date_err: None,
             oth_err: None,
         }
     }
@@ -280,12 +281,19 @@ impl Component for FormEntreprise {
                         self.error_msg = Some("Erreur : Aucun jours travaillés".to_string());
                         true
                     } else if self.current_step == 3 && self.total != 0 && self.current_step != 2 || self.current_step == 3 && self.total < 0 && self.current_step != 2 {
-                        self.error_msg = None;
                         self.oth_err = Some("Mauvais positionnement, recommencez".to_string());
                         true
-                    } else {
+                    } else if self.current_step == 1 && !date_test(&self.date){
+                        //regexpDate ok
+                        self.date_err = Some("Format incorrect (JJ-MM-AAAA)".to_string());
+                        true
+                    }else {
                         if self.current_step < 3 {
                             self.current_step += 1;
+                            //Clear errMsg when ok
+                            self.date_err = None;
+                            self.oth_err = None;
+                            self.error_msg = None;
                             true
                         } else {
                             let entreprise = Entreprise {
@@ -436,7 +444,7 @@ impl FormEntreprise {
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="date"
                                 type="text"
-                                placeholder="Date potentielle ouverture (JJ:MM:AAAA)"
+                                placeholder="Date potentielle ouverture (JJ-MM-AAAA)"
                                 value={self.date.clone()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
@@ -444,6 +452,17 @@ impl FormEntreprise {
                                 })}
                                 required=true
                             />
+                        {
+                            if let Some(ref message) = self.date_err {
+                                html! {
+                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                        { message }
+                                    </div>
+                                }
+                            } else {
+                                html! { <></> }
+                            }
+                        }
                         </div>
                         <div class="mb-6">
                             <label class="block text-orange-500 text-sm font-semibold mb-2" for="codeape">{ "Code APE" }</label>

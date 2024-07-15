@@ -1,4 +1,6 @@
-NEXT.rs => regex date
-
+NEXT.rs =>
+regex date
+add at db new column
+(ttx, - cp, - feries, - week)
 STEPONE.rs =>
-1 - Production, can do more 100 % en ent,
+1 - Fix percentage with new value at new column

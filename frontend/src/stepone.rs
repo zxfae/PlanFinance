@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement};
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
@@ -39,6 +39,9 @@ pub struct StepTwo {
     clone_jrsttx: Option<i32>,
     pourcentagejrsent: i32,
     pourcetagenon: i32,
+    error_percent: Option<String>,
+    error_totalstep1: Option<String>,
+    total: i32,
     submitted: bool,
 }
 
@@ -56,6 +59,7 @@ pub enum Msg {
     UpdateCaAnn(i64),
     CalculatePouJTTX,
     CalculePourNon,
+    CalculateTotalS1,
     Submit,
     SubmissionComplete(StepTwoo),
     LoadEntreprise(Entreprise),
@@ -75,6 +79,7 @@ pub struct Entreprise {
     jrsferies: i8,
     jrscp: i8,
 }
+
 impl Component for StepTwo {
     type Message = Msg;
     type Properties = ();
@@ -121,6 +126,9 @@ impl Component for StepTwo {
             clone_jrsttx: None,
             pourcentagejrsent: 0,
             pourcetagenon: 0,
+            total: 0,
+            error_percent: None,
+            error_totalstep1: None,
             submitted: false,
         }
     }
@@ -130,26 +138,31 @@ impl Component for StepTwo {
             Msg::UpdateProduction(value) => {
                 self.production = value;
                 ctx.link().send_message(Msg::CalculatePouJTTX);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::UpdateEntretien(value) => {
                 self.entretien = value;
                 ctx.link().send_message(Msg::CalculePourNon);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::UpdateClientele(value) => {
                 self.clientele = value;
                 ctx.link().send_message(Msg::CalculePourNon);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::UpdateInterprofession(value) => {
                 self.interprofession = value;
                 ctx.link().send_message(Msg::CalculePourNon);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::UpdateFormation(value) => {
                 self.formation = value;
                 ctx.link().send_message(Msg::CalculePourNon);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::UpdateProdjour(value) => {
@@ -176,12 +189,10 @@ impl Component for StepTwo {
                 self.caann = value;
                 true
             }
-            //convert to f64 'cause i need to round my value, if not percent are bad
             Msg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
-                        //get &self.entreprise necessary to calculate value jjrs - jjrsnnttx
-                        if let Some(entreprise) = &self.entreprise{
+                        if let Some(entreprise) = &self.entreprise {
                             self.pourcentagejrsent = ((self.production as f64) * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
                         }
                     } else {
@@ -197,8 +208,8 @@ impl Component for StepTwo {
             Msg::CalculePourNon => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
-                        if let Some(entreprise) = &self.entreprise{
-                            self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64) * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64- entreprise.jrscp as f64- entreprise.jrsferies as f64)).round() as i32;
+                        if let Some(entreprise) = &self.entreprise {
+                            self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64) * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
                         }
                     } else {
                         log::warn!("Pas de division possible, jrsttx == 0");
@@ -210,56 +221,82 @@ impl Component for StepTwo {
                 }
                 true
             }
+            Msg::CalculateTotalS1 => {
+                if let Some(clone_jrsttx) = self.clone_jrsttx {
+                    if let Some(entreprise) = &self.entreprise {
+                        self.total = clone_jrsttx -
+                            (entreprise.jrsweek as i32) -
+                            (entreprise.jrscp as i32) -
+                            (entreprise.jrsferies as i32) -
+                            self.production -
+                            self.entretien -
+                            self.clientele -
+                            self.interprofession -
+                            self.formation;
+                    }
+                }
+                true
+            }
             Msg::Submit => {
                 if !self.submitted {
-                    let activities = StepTwoo {
-                        id: 0,
-                        user_id: self.user_id.unwrap_or_default(),
-                        production: self.production,
-                        entretien: self.entretien,
-                        clientele: self.clientele,
-                        interprofession: self.interprofession,
-                        formation: self.formation,
-                        prodjour: self.prodjour,
-                        prodan: self.prodan,
-                        tva: self.tva,
-                        moyprix: self.moyprix,
-                        cajour: self.cajour,
-                        caann: self.caann,
-                    };
-                    let activities_json = serde_json::to_string(&activities).unwrap();
-                    log::info!("Submitting activities: {}", activities_json);
-                    ctx.link().send_future(async {
-                        let response = Request::post("http://localhost:8080/add_act")
-                            .header("Content-Type", "application/json")
-                            .body(activities_json)
-                            .send()
-                            .await;
+                    if self.pourcetagenon + self.pourcentagejrsent > 100 {
+                        self.error_percent = Some("Erreur : Il n'est pas autorisé de dépasser 100%".to_string());
+                        true
+                    } else if self.total != 0 {
+                        self.error_totalstep1 = Some("Erreur : Il vous reste des jours a positionner".to_string());
+                        true
+                    } else {
+                        self.error_totalstep1 = None;
+                        self.error_percent = None;
+                        let activities = StepTwoo {
+                            id: 0,
+                            user_id: self.user_id.unwrap_or_default(),
+                            production: self.production,
+                            entretien: self.entretien,
+                            clientele: self.clientele,
+                            interprofession: self.interprofession,
+                            formation: self.formation,
+                            prodjour: self.prodjour,
+                            prodan: self.prodan,
+                            tva: self.tva,
+                            moyprix: self.moyprix,
+                            cajour: self.cajour,
+                            caann: self.caann,
+                        };
+                        let activities_json = serde_json::to_string(&activities).unwrap();
+                        log::info!("Submitting activities: {}", activities_json);
+                        ctx.link().send_future(async {
+                            let response = Request::post("http://localhost:8080/add_act")
+                                .header("Content-Type", "application/json")
+                                .body(activities_json)
+                                .send()
+                                .await;
 
-                        match response {
-                            Ok(resp) => {
-                                if resp.ok() {
-                                    let new_activities: Result<StepTwoo, _> = resp.json().await;
-                                    match new_activities {
-                                        Ok(new_activities) => Msg::SubmissionComplete(new_activities),
-                                        Err(e) => {
-                                            log::error!("Failed to parse response: {:?}", e);
-                                            Msg::Submit
+                            match response {
+                                Ok(resp) => {
+                                    if resp.ok() {
+                                        let new_activities: Result<StepTwoo, _> = resp.json().await;
+                                        match new_activities {
+                                            Ok(new_activities) => Msg::SubmissionComplete(new_activities),
+                                            Err(e) => {
+                                                log::error!("Failed to parse response: {:?}", e);
+                                                Msg::Submit
+                                            }
                                         }
+                                    } else {
+                                        log::error!("Failed to submit activities: {}", resp.status());
+                                        Msg::Submit
                                     }
-                                } else {
-                                    log::error!("Failed to submit activities: {}", resp.status());
+                                }
+                                Err(e) => {
+                                    log::error!("Request failed: {:?}", e);
                                     Msg::Submit
                                 }
                             }
-                            Err(e) => {
-                                log::error!("Request failed: {:?}", e);
-                                Msg::Submit
-                            }
-                        }
-                    });
-                    self.submitted = true;
-                    true
+                        });
+                        self.submitted = true;
+                        true
+                    }
                 } else {
                     false
                 }
@@ -280,6 +317,7 @@ impl Component for StepTwo {
             Msg::LoadEntreprise(entreprise) => {
                 self.clone_jrsttx = Some(entreprise.jrsttx);
                 self.entreprise = Some(entreprise);
+                ctx.link().send_message(Msg::CalculateTotalS1);
                 true
             }
             Msg::LoadEntrepriseError => {
@@ -320,8 +358,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i32>() {
-                                                    Ok(value) => Msg::UpdateProduction(value),
-                                                    Err(_) => Msg::UpdateProduction(0),
+                                                Ok(value) => Msg::UpdateProduction(value),
+                                                Err(_) => Msg::UpdateProduction(0),
                                             }
                                         })}
                                     />
@@ -345,8 +383,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i32>() {
-                                                    Ok(value) => Msg::UpdateEntretien(value),
-                                                    Err(_) => Msg::UpdateEntretien(0),
+                                                Ok(value) => Msg::UpdateEntretien(value),
+                                                Err(_) => Msg::UpdateEntretien(0),
                                             }
                                         })}
                                     />
@@ -364,8 +402,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i32>() {
-                                                    Ok(value) => Msg::UpdateClientele(value),
-                                                    Err(_) => Msg::UpdateClientele(0),
+                                                Ok(value) => Msg::UpdateClientele(value),
+                                                Err(_) => Msg::UpdateClientele(0),
                                             }
                                         })}
                                     />
@@ -383,8 +421,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i32>() {
-                                                    Ok(value) => Msg::UpdateInterprofession(value),
-                                                    Err(_) => Msg::UpdateInterprofession(0),
+                                                Ok(value) => Msg::UpdateInterprofession(value),
+                                                Err(_) => Msg::UpdateInterprofession(0),
                                             }
                                         })}
                                     />
@@ -402,8 +440,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i32>() {
-                                                    Ok(value) => Msg::UpdateFormation(value),
-                                                    Err(_) => Msg::UpdateFormation(0),
+                                                Ok(value) => Msg::UpdateFormation(value),
+                                                Err(_) => Msg::UpdateFormation(0),
                                             }
                                         })}
                                     />
@@ -419,10 +457,30 @@ impl Component for StepTwo {
                             <tr>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">
-                                    {""}
+                                    {
+                                        if let Some(ref message) = self.error_totalstep1 {
+                                            html! {
+                                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                                    { message }
+                                                </div>
+                                            }
+                                        } else {
+                                            html! { <></> }
+                                        }
+                                    }
                                 </td>
-                                <td class="border px-4 py-2">{ self.view_cloned_jrsttx() }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">{ self.total }</td>
+                                <td class="border px-4 py-2">{
+                            if let Some(ref message) = self.error_percent {
+                                html! {
+                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                        { message }
+                                    </div>
+                                }
+                            } else {
+                                html! { <></> }
+                            }
+                        }</td>
                             </tr>
                         </tbody>
                     </table>
@@ -447,8 +505,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
-                                                    Ok(value) => Msg::UpdateProdjour(value),
-                                                    Err(_) => Msg::UpdateProdjour(0),
+                                                Ok(value) => Msg::UpdateProdjour(value),
+                                                Err(_) => Msg::UpdateProdjour(0),
                                             }
                                         })}
                                     />
@@ -464,8 +522,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
-                                                    Ok(value) => Msg::UpdateProdan(value),
-                                                    Err(_) => Msg::UpdateProdan(0),
+                                                Ok(value) => Msg::UpdateProdan(value),
+                                                Err(_) => Msg::UpdateProdan(0),
                                             }
                                         })}
                                     />
@@ -497,8 +555,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateTva(value),
-                                                    Err(_) => Msg::UpdateTva(0),
+                                                Ok(value) => Msg::UpdateTva(value),
+                                                Err(_) => Msg::UpdateTva(0),
                                             }
                                         })}
                                     />
@@ -515,8 +573,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
-                                                    Ok(value) => Msg::UpdateMoyPrix(value),
-                                                    Err(_) => Msg::UpdateMoyPrix(0),
+                                                Ok(value) => Msg::UpdateMoyPrix(value),
+                                                Err(_) => Msg::UpdateMoyPrix(0),
                                             }
                                         })}
                                     />
@@ -534,8 +592,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
-                                                    Ok(value) => Msg::UpdateCaJour(value),
-                                                    Err(_) => Msg::UpdateCaJour(0),
+                                                Ok(value) => Msg::UpdateCaJour(value),
+                                                Err(_) => Msg::UpdateCaJour(0),
                                             }
                                         })}
                                     />
@@ -553,8 +611,8 @@ impl Component for StepTwo {
                                         oninput={ctx.link().callback(|e: InputEvent| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
                                             match input.value().parse::<i64>() {
-                                                    Ok(value) => Msg::UpdateCaAnn(value),
-                                                    Err(_) => Msg::UpdateCaAnn(0),
+                                                Ok(value) => Msg::UpdateCaAnn(value),
+                                                Err(_) => Msg::UpdateCaAnn(0),
                                             }
                                         })}
                                     />

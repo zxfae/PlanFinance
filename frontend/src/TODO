@@ -7,3 +7,5 @@ Production - Service - Vente / jour
 Production - Service - Vente / an	8 <= njrs encaissement - decaissement
 
 regler idem caannuel
+
+d => i have NaN, when form value at moyprix deleted

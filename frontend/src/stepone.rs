@@ -205,7 +205,7 @@ impl Component for StepTwo {
                 ctx.link().send_message(Msg::CalculateHtJours);
                 true
             }
-            
+
             Msg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
@@ -258,11 +258,8 @@ impl Component for StepTwo {
             Msg::UpdateTotalService =>{
                 if let Some(clone_jrsttx) = self.clone_jrsttx{
                     if let Some(entreprise) = &self.entreprise{
-                        self.totalservice = self.prodjour as i64 *
-                            clone_jrsttx as i64-
-                            (entreprise.jrsweek as i64) -
-                            (entreprise.jrscp as i64) -
-                            (entreprise.jrsferies as i64);
+                        self.totalservice = self.production as i64 *
+                        self.prodjour;
                         //Display
                         if self.totalservice <= 0{
                             self.totalservice = 0;

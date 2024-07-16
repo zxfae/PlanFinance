@@ -17,9 +17,7 @@ pub struct StepTwoo {
     prodjour: i64,
     prodan: i64,
     tva: i8,
-    moyprix: i64,
-    cajour: i64,
-    caann: i64,
+    moyprix: f64,
 }
 
 pub struct StepTwo {
@@ -32,13 +30,18 @@ pub struct StepTwo {
     prodjour: i64,
     prodan: i64,
     tva: i8,
-    moyprix: i64,
-    cajour: i64,
-    caann: i64,
+    moyprix: f64,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
     pourcentagejrsent: i32,
     pourcetagenon: i32,
+    totalservice: i64,
+    donttva:f64,
+    totalmoyprix:f64,
+    htcanann:f64,
+    tvaann:f64,
+    ttcann:f64,
+    htjours:f64,
     error_percent: Option<String>,
     error_totalstep1: Option<String>,
     total: i32,
@@ -54,12 +57,17 @@ pub enum Msg {
     UpdateProdjour(i64),
     UpdateProdan(i64),
     UpdateTva(i8),
-    UpdateMoyPrix(i64),
-    UpdateCaJour(i64),
-    UpdateCaAnn(i64),
+    UpdateMoyPrix(f64),
     CalculatePouJTTX,
     CalculePourNon,
     CalculateTotalS1,
+    UpdateTotalService,
+    CalculateDontTva,
+    CalculateMoyTtTva,
+    CalculateCaAnnHt,
+    CalculcateTvaAnn,
+    CalculateTtcAnn,
+    CalculateHtJours,
     Submit,
     SubmissionComplete(StepTwoo),
     LoadEntreprise(Entreprise),
@@ -95,6 +103,7 @@ impl Component for StepTwo {
             .flatten()
             .and_then(|id| id.parse::<i32>().ok());
 
+        //get API ent per user
         if let Some(user_id) = user_id {
             ctx.link().send_future(async move {
                 let url = format!("http://localhost:8080/get_ent?user_id={}", user_id);
@@ -119,14 +128,19 @@ impl Component for StepTwo {
             prodjour: 0,
             prodan: 0,
             tva: 0,
-            moyprix: 0,
-            cajour: 0,
-            caann: 0,
+            moyprix: 0.0,
             entreprise: None,
             clone_jrsttx: None,
             pourcentagejrsent: 0,
             pourcetagenon: 0,
             total: 0,
+            totalservice: 0,
+            donttva:0.0,
+            totalmoyprix: 0.0,
+            htcanann:0.0,
+            tvaann:0.0,
+            ttcann: 0.0,
+            htjours:0.0,
             error_percent: None,
             error_totalstep1: None,
             submitted: false,
@@ -135,10 +149,12 @@ impl Component for StepTwo {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            //Update values
             Msg::UpdateProduction(value) => {
                 self.production = value;
                 ctx.link().send_message(Msg::CalculatePouJTTX);
                 ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(Msg::CalculateHtJours);
                 true
             }
             Msg::UpdateEntretien(value) => {
@@ -167,6 +183,7 @@ impl Component for StepTwo {
             }
             Msg::UpdateProdjour(value) => {
                 self.prodjour = value;
+                ctx.link().send_message(Msg::UpdateTotalService);
                 true
             }
             Msg::UpdateProdan(value) => {
@@ -175,20 +192,20 @@ impl Component for StepTwo {
             }
             Msg::UpdateTva(value) => {
                 self.tva = value;
+                ctx.link().send_message(Msg::CalculateDontTva);
                 true
             }
             Msg::UpdateMoyPrix(value) => {
                 self.moyprix = value;
+                ctx.link().send_message(Msg::CalculateDontTva);
+                ctx.link().send_message(Msg::CalculateMoyTtTva);
+                ctx.link().send_message(Msg::CalculateCaAnnHt);
+                ctx.link().send_message(Msg::CalculcateTvaAnn);
+                ctx.link().send_message(Msg::CalculateTtcAnn);
+                ctx.link().send_message(Msg::CalculateHtJours);
                 true
             }
-            Msg::UpdateCaJour(value) => {
-                self.cajour = value;
-                true
-            }
-            Msg::UpdateCaAnn(value) => {
-                self.caann = value;
-                true
-            }
+            
             Msg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
@@ -237,13 +254,63 @@ impl Component for StepTwo {
                 }
                 true
             }
+            //Prod / an
+            Msg::UpdateTotalService =>{
+                if let Some(clone_jrsttx) = self.clone_jrsttx{
+                    if let Some(entreprise) = &self.entreprise{
+                        self.totalservice = self.prodjour as i64 *
+                            clone_jrsttx as i64-
+                            (entreprise.jrsweek as i64) -
+                            (entreprise.jrscp as i64) -
+                            (entreprise.jrsferies as i64);
+                        //Display
+                        if self.totalservice <= 0{
+                            self.totalservice = 0;
+                        }
+                    }
+                }
+                true
+            }
+            Msg::CalculateDontTva => {
+                self.donttva = (self.moyprix as f64) *
+                    (self.tva as f64) / 100.00;
+                true
+            }
+            Msg::CalculateMoyTtTva => {
+                self.totalmoyprix = (self.moyprix) +
+                    (self.donttva as f64);
+                true
+            }
+            Msg::CalculateCaAnnHt => {
+                self.htcanann = (self.totalservice as f64) *
+                    self.moyprix;
+                true
+            }
+            Msg::CalculcateTvaAnn => {
+                self.tvaann = ((self.totalservice as f64) *
+                    self.moyprix) *
+                    (self.tva as f64) / 100.00;
+                true
+            }
+            Msg::CalculateTtcAnn => {
+                self.ttcann = ((self.totalservice as f64) *
+                    self.moyprix) +
+                    self.tvaann;
+                true
+            }
+            Msg::CalculateHtJours => {
+                self.htjours = ((self.totalservice as f64) *
+                    self.moyprix) /
+                    self.production as f64;
+                true
+            }
             Msg::Submit => {
                 if !self.submitted {
                     if self.pourcetagenon + self.pourcentagejrsent > 100 {
-                        self.error_percent = Some("Erreur : Il n'est pas autorisé de dépasser 100%".to_string());
+                        self.error_percent = Some("Erreur : Il n'est pas autorisé de dépasser le nombre de jours à positionner".to_string());
                         true
                     } else if self.total != 0 {
-                        self.error_totalstep1 = Some("Erreur : Il vous reste des jours a positionner".to_string());
+                        self.error_totalstep1 = Some("Erreur : Il vous reste des jours à positionner".to_string());
                         true
                     } else {
                         self.error_totalstep1 = None;
@@ -260,8 +327,6 @@ impl Component for StepTwo {
                             prodan: self.prodan,
                             tva: self.tva,
                             moyprix: self.moyprix,
-                            cajour: self.cajour,
-                            caann: self.caann,
                         };
                         let activities_json = serde_json::to_string(&activities).unwrap();
                         log::info!("Submitting activities: {}", activities_json);
@@ -341,10 +406,10 @@ impl Component for StepTwo {
                     <table class=" mb-4 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
                             <tr class="bg-orange-100">
-                                <th class="px-4 py-2">{ "Répartition temps d'activité" }</th>
-                                <th class="px-4 py-2">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2">{ "Jours en Entreprise" }</th>
-                                <th class="px-4 py-2">{ "Pourcentage" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Répartition temps d'activité" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Nombre de jours" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Jours en Entreprise" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Pourcentage" }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -469,7 +534,7 @@ impl Component for StepTwo {
                                         }
                                     }
                                 </td>
-                                <td class="border px-4 py-2">{ self.total }</td>
+                                <td class="border px-4 py-2">{ self.view_total_form() }</td>
                                 <td class="border px-4 py-2">{
                             if let Some(ref message) = self.error_percent {
                                 html! {
@@ -490,13 +555,13 @@ impl Component for StepTwo {
                     <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
                             <tr class="bg-orange-100">
-                                <th class="px-4 py-2">{ "Prestation" }</th>
-                                <th class="px-4 py-2">{ "Production/Encaissement" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Prestation" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Production/Encaissement" }</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border px-4 py-2">{ "Production - Encaissement / jour" }</td>
+                                <td class="border px-4 py-2">{ "Production - Service - Vente / jour" }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -513,21 +578,8 @@ impl Component for StepTwo {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Production - Encaissement / an" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={"Auto"}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i64>() {
-                                                Ok(value) => Msg::UpdateProdan(value),
-                                                Err(_) => Msg::UpdateProdan(0),
-                                            }
-                                        })}
-                                    />
-                                </td>
+                                <td class="border px-4 py-2">{ "Production - Service - Vente / an" }</td>
+                                <td class="border px-4 py-2 text-emerald-600 text-right">{format!("{}", self.totalservice)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -566,59 +618,34 @@ impl Component for StepTwo {
                             <tr>
                                 <td class="border px-4 py-2">{ "Moyenne prix de vente" }</td>
                                 <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.moyprix.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i64>() {
-                                                Ok(value) => Msg::UpdateMoyPrix(value),
-                                                Err(_) => Msg::UpdateMoyPrix(0),
-                                            }
-                                        })}
-                                    />
-                                </td>
-                                <td class="border px-4 py-2">{ "auto" }</td>
-                                <td class="border px-4 py-2">{ "auto" }</td>
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={format!("{:.2}", self.moyprix).replace('.', ",")}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        let value_str = input.value().replace(',', ".");
+                                        match value_str.parse::<f64>() {
+                                            Ok(value) => Msg::UpdateMoyPrix(value),
+                                            Err(_) => Msg::UpdateMoyPrix(0.0),
+                                        }
+                                    })}
+                                />
+                            </td>
+                                                <td class="border px-4 py-2">{ self.donttva.to_string() }</td>
+                                <td class="border px-4 py-2">{ self.totalmoyprix.to_string() }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "CA journalier" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.cajour.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i64>() {
-                                                Ok(value) => Msg::UpdateCaJour(value),
-                                                Err(_) => Msg::UpdateCaJour(0),
-                                            }
-                                        })}
-                                    />
-                                </td>
+                                <td class="border px-4 py-2">{ self.htjours.to_string() }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
                                 <td class="border px-4 py-2">{ "CA annuel" }</td>
-                                <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.caann.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i64>() {
-                                                Ok(value) => Msg::UpdateCaAnn(value),
-                                                Err(_) => Msg::UpdateCaAnn(0),
-                                            }
-                                        })}
-                                    />
-                                </td>
-                                <td class="border px-4 py-2">{ "auto" }</td>
-                                <td class="border px-4 py-2">{ "auto" }</td>
+                                <td class="border px-4 py-2">{ self.htcanann.to_string() }</td>
+                                <td class="border px-4 py-2">{ self.tvaann.to_string() }</td>
+                                <td class="border px-4 py-2 text-orange-400">{ self.ttcann.to_string() }</td>
                             </tr>
                         </tbody>
                     </table>
@@ -663,6 +690,20 @@ impl StepTwo {
             }
         } else {
             html! { <p class="text-gray-700">{ "No cloned jrsttx available" }</p> }
+        }
+    }
+
+    fn view_total_form(&self) -> Html{
+        html!{
+            <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                            { "Il vous reste " }
+                            <div class="text-red-500">
+                                { self.total }
+                            </div>
+                            <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                                {"jours à positionner"}
+                            </div>
+                        </div>
         }
     }
 }

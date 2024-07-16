@@ -1,1 +1,9 @@
-Ok
+stepone.rs =>
+a Create select for TVA
+b Better handling to float parse on oninput html
+c =>
+Prestation	Production/Encaissement
+Production - Service - Vente / jour
+Production - Service - Vente / an	8 <= njrs encaissement - decaissement
+
+regler idem caannuel

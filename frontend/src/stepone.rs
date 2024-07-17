@@ -296,15 +296,9 @@ impl Component for StepTwo {
                 true
             }
             Msg::CalculateHtJours => {
-                //Form prod delete value, htjours = 'inf' of 'nan'
-                //Correction
-                if self.production != 0{
-                    self.htjours = ((self.totalservice as f64) *
-                        self.moyprix) /
-                        self.production as f64;
-                } else {
-                    self.htjours = 0.0;
-                }
+                self.htjours = ((self.totalservice as f64) *
+                    self.moyprix) /
+                    self.production as f64;
                 true
             }
             Msg::Submit => {

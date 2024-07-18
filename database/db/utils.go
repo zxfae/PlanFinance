@@ -34,17 +34,22 @@ type Entreprises struct {
 }
 
 type Activites struct {
-	ID              int `json:"id"`
-	UserId          int `json:"user_id"`
-	Production      int `json:"production"`
-	Entretien       int `json:"entretien"`
-	Clientele       int `json:"clientele"`
-	Interprofession int `json:"interprofession"`
-	Formation       int `json:"formation"`
-	Prodjour        int `json:"prodjour"`
-	Prodan          int `json:"prodan"`
-	Tva             int `json:"tva"`
-	Moyprix         int `json:"moyprix"`
-	Cajour          int `json:"cajour"`
-	Caann           int `json:"caann"`
+	ID              int     `json:"id"`
+	UserId          int     `json:"user_id"`
+	Production      int     `json:"production"`
+	Entretien       int     `json:"entretien"`
+	Clientele       int     `json:"clientele"`
+	Interprofession int     `json:"interprofession"`
+	Formation       int     `json:"formation"`
+	Prodjour        int     `json:"prodjour"`
+	Prodan          int     `json:"prodan"`
+	Tva             int     `json:"tva"`
+	Moyprix         float64 `json:"moyprix"`
+	TotalService    int     `json:"totalservice"`
+	Donttva         float64 `json:"donttva"`
+	Totalmoyprix    float64 `json:"totalmoyprix"`
+	Htjours         float64 `json:"htjours"`
+	Ttcann          float64 `json:"ttcann"`
+	Tvaann          float64 `json:"tvaann"`
+	Htcanann        float64 `json:"htcanann"`
 }

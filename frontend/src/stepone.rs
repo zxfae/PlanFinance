@@ -15,9 +15,15 @@ pub struct StepTwoo {
     interprofession: i32,
     formation: i32,
     prodjour: i64,
-    prodan: i64,
     tva: i8,
     moyprix: f64,
+    donttva: f64,
+    totalservice: i64,
+    totalmoyprix: f64,
+    htcanann: f64,
+    tvaann: f64,
+    ttcann: f64,
+    htjours: f64,
 }
 
 pub struct StepTwo {
@@ -28,7 +34,6 @@ pub struct StepTwo {
     interprofession: i32,
     formation: i32,
     prodjour: i64,
-    prodan: i64,
     tva: i8,
     moyprix: f64,
     entreprise: Option<Entreprise>,
@@ -36,12 +41,12 @@ pub struct StepTwo {
     pourcentagejrsent: i32,
     pourcetagenon: i32,
     totalservice: i64,
-    donttva:f64,
-    totalmoyprix:f64,
-    htcanann:f64,
-    tvaann:f64,
-    ttcann:f64,
-    htjours:f64,
+    donttva: f64,
+    totalmoyprix: f64,
+    htcanann: f64,
+    tvaann: f64,
+    ttcann: f64,
+    htjours: f64,
     error_percent: Option<String>,
     error_totalstep1: Option<String>,
     total: i32,
@@ -55,7 +60,6 @@ pub enum Msg {
     UpdateInterprofession(i32),
     UpdateFormation(i32),
     UpdateProdjour(i64),
-    UpdateProdan(i64),
     UpdateTva(i8),
     UpdateMoyPrix(f64),
     CalculatePouJTTX,
@@ -126,7 +130,6 @@ impl Component for StepTwo {
             interprofession: 0,
             formation: 0,
             prodjour: 0,
-            prodan: 0,
             tva: 0,
             moyprix: 0.0,
             entreprise: None,
@@ -135,12 +138,12 @@ impl Component for StepTwo {
             pourcetagenon: 0,
             total: 0,
             totalservice: 0,
-            donttva:0.0,
+            donttva: 0.0,
             totalmoyprix: 0.0,
-            htcanann:0.0,
-            tvaann:0.0,
+            htcanann: 0.0,
+            tvaann: 0.0,
             ttcann: 0.0,
-            htjours:0.0,
+            htjours: 0.0,
             error_percent: None,
             error_totalstep1: None,
             submitted: false,
@@ -149,7 +152,7 @@ impl Component for StepTwo {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            //Update values
+            // Mise à jour des valeurs
             Msg::UpdateProduction(value) => {
                 self.production = value;
                 ctx.link().send_message(Msg::CalculatePouJTTX);
@@ -184,10 +187,6 @@ impl Component for StepTwo {
             Msg::UpdateProdjour(value) => {
                 self.prodjour = value;
                 ctx.link().send_message(Msg::UpdateTotalService);
-                true
-            }
-            Msg::UpdateProdan(value) => {
-                self.prodan = value;
                 true
             }
             Msg::UpdateTva(value) => {
@@ -254,14 +253,13 @@ impl Component for StepTwo {
                 }
                 true
             }
-            //Prod / an
-            Msg::UpdateTotalService =>{
-                if let Some(clone_jrsttx) = self.clone_jrsttx{
-                    if let Some(entreprise) = &self.entreprise{
-                        self.totalservice = self.production as i64 *
-                        self.prodjour;
-                        //Display
-                        if self.totalservice <= 0{
+            // Calcul du total service
+            Msg::UpdateTotalService => {
+                if let Some(clone_jrsttx) = self.clone_jrsttx {
+                    if let Some(entreprise) = &self.entreprise {
+                        self.totalservice = self.production as i64 * self.prodjour;
+                        log::info!("Total service updated: {}", self.totalservice);
+                        if self.totalservice <= 0 {
                             self.totalservice = 0;
                         }
                     }
@@ -269,36 +267,29 @@ impl Component for StepTwo {
                 true
             }
             Msg::CalculateDontTva => {
-                self.donttva = (self.moyprix as f64) *
-                    (self.tva as f64) / 100.00;
+                self.donttva = (self.moyprix * self.tva as f64) / 100.0;
+                //log?
+                log::info!("Dont TVA calculé: {}", self.donttva);
                 true
             }
             Msg::CalculateMoyTtTva => {
-                self.totalmoyprix = (self.moyprix) +
-                    (self.donttva as f64);
+                self.totalmoyprix = self.moyprix + self.donttva;
                 true
             }
             Msg::CalculateCaAnnHt => {
-                self.htcanann = (self.totalservice as f64) *
-                    self.moyprix;
+                self.htcanann = self.totalservice as f64 * self.moyprix;
                 true
             }
             Msg::CalculcateTvaAnn => {
-                self.tvaann = ((self.totalservice as f64) *
-                    self.moyprix) *
-                    (self.tva as f64) / 100.00;
+                self.tvaann = (self.totalservice as f64 * self.moyprix) * self.tva as f64 / 100.0;
                 true
             }
             Msg::CalculateTtcAnn => {
-                self.ttcann = ((self.totalservice as f64) *
-                    self.moyprix) +
-                    self.tvaann;
+                self.ttcann = (self.totalservice as f64 * self.moyprix) + self.tvaann;
                 true
             }
             Msg::CalculateHtJours => {
-                self.htjours = ((self.totalservice as f64) *
-                    self.moyprix) /
-                    self.production as f64;
+                self.htjours = (self.totalservice as f64 * self.moyprix) / self.production as f64;
                 true
             }
             Msg::Submit => {
@@ -321,9 +312,15 @@ impl Component for StepTwo {
                             interprofession: self.interprofession,
                             formation: self.formation,
                             prodjour: self.prodjour,
-                            prodan: self.prodan,
                             tva: self.tva,
                             moyprix: self.moyprix,
+                            donttva: self.donttva,
+                            totalservice: self.totalservice,
+                            totalmoyprix: self.totalmoyprix,
+                            htcanann: self.htcanann,
+                            tvaann: self.tvaann,
+                            ttcann: self.ttcann,
+                            htjours: self.htjours,
                         };
                         let activities_json = serde_json::to_string(&activities).unwrap();
                         log::info!("Submitting activities: {}", activities_json);
@@ -615,21 +612,21 @@ impl Component for StepTwo {
                             <tr>
                                 <td class="border px-4 py-2">{ "Moyenne prix de vente" }</td>
                                 <td class="border px-4 py-2">
-                                <input
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    type="text"
-                                    value={format!("{:.2}", self.moyprix).replace('.', ",")}
-                                    oninput={ctx.link().callback(|e: InputEvent| {
-                                        let input: HtmlInputElement = e.target_unchecked_into();
-                                        let value_str = input.value().replace(',', ".");
-                                        match value_str.parse::<f64>() {
-                                            Ok(value) => Msg::UpdateMoyPrix(value),
-                                            Err(_) => Msg::UpdateMoyPrix(0.0),
-                                        }
-                                    })}
-                                />
-                            </td>
-                                                <td class="border px-4 py-2">{ self.donttva.to_string() }</td>
+                                    <input
+                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        type="text"
+                                        value={format!("{:.2}", self.moyprix).replace('.', ",")}
+                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            let value_str = input.value().replace(',', ".");
+                                            match value_str.parse::<f64>() {
+                                                Ok(value) => Msg::UpdateMoyPrix(value),
+                                                Err(_) => Msg::UpdateMoyPrix(0.0),
+                                            }
+                                        })}
+                                    />
+                                </td>
+                                <td class="border px-4 py-2">{ self.donttva.to_string() }</td>
                                 <td class="border px-4 py-2">{ self.totalmoyprix.to_string() }</td>
                             </tr>
                             <tr>

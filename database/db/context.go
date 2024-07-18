@@ -82,14 +82,14 @@ func AddActivites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, cajour, caann) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, totalmoyprix, donttva, totalservice, htjours, ttcann, tvaann, htcanann) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation, act.Prodjour, act.Prodan, act.Tva, act.Moyprix, act.Cajour, act.Caann)
+	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation, act.Prodjour, act.Prodan, act.Tva, act.Moyprix, act.Totalmoyprix, act.Donttva, act.TotalService, act.Htjours, act.Ttcann, act.Tvaann, act.Htcanann)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

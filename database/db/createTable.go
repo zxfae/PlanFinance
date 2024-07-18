@@ -45,6 +45,7 @@ func CreateTableEntreprise(db *sql.DB) error {
 	return err
 }
 
+// Since totalservice, is autocompletion on myform
 func CreateTableActivite(db *sql.DB) error {
 	table := `
 	CREATE TABLE IF NOT EXISTS Activites(
@@ -58,9 +59,14 @@ func CreateTableActivite(db *sql.DB) error {
 		prodjour INTEGER,
 		prodan INTEGER,
 		tva INTEGER,
-		moyprix INTEGER,
-		cajour INTEGER,
-		caann INTEGER,
+		moyprix REAL,
+		donttva REAL,
+		totalservice INTEGER,
+		totalmoyprix REAL,
+		htjours REAL,
+		ttcann REAL,
+		tvaann REAL,
+		htcanann REAL,
 		FOREIGN KEY(user_id) REFERENCES Users(id)
 	)`
 	_, err := db.Exec(table)

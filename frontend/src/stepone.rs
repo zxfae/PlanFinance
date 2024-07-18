@@ -47,7 +47,9 @@ pub struct StepTwo {
     tvaann: f64,
     ttcann: f64,
     htjours: f64,
+    current_step: usize,
     error_percent: Option<String>,
+    error_tva: Option<String>,
     error_totalstep1: Option<String>,
     total: i32,
     submitted: bool,
@@ -130,7 +132,7 @@ impl Component for StepTwo {
             interprofession: 0,
             formation: 0,
             prodjour: 0,
-            tva: 0.0,
+            tva: -1.0,
             moyprix: 0.0,
             entreprise: None,
             clone_jrsttx: None,
@@ -144,8 +146,10 @@ impl Component for StepTwo {
             tvaann: 0.0,
             ttcann: 0.0,
             htjours: 0.0,
+            current_step:1,
             error_percent: None,
             error_totalstep1: None,
+            error_tva: None,
             submitted: false,
         }
     }
@@ -268,8 +272,9 @@ impl Component for StepTwo {
             }
             Msg::CalculateDontTva => {
                 self.donttva = (self.moyprix * self.tva as f64) / 100.0;
-                //log?
-                log::info!("Dont TVA calculé: {}", self.donttva);
+                if self.donttva <= 0.0{
+                    self.donttva = 0.0;
+                }
                 true
             }
             Msg::CalculateMoyTtTva => {
@@ -282,6 +287,9 @@ impl Component for StepTwo {
             }
             Msg::CalculcateTvaAnn => {
                 self.tvaann = (self.totalservice as f64 * self.moyprix) * self.tva as f64 / 100.0;
+                if self.tvaann <= 0.0{
+                    self.tvaann = 0.0;
+                }
                 true
             }
             Msg::CalculateTtcAnn => {
@@ -300,9 +308,15 @@ impl Component for StepTwo {
                     } else if self.total != 0 {
                         self.error_totalstep1 = Some("Erreur : Il vous reste des jours à positionner".to_string());
                         true
-                    } else {
-                        self.error_totalstep1 = None;
+                    } else if self.tva == -1.0{
+                        self.error_tva = Some("Erreur : Mettez à jour votre TVA".to_string());
+                        true
+                    } else if self.moyprix == 0.0 {
+                        true
+                    }else {
                         self.error_percent = None;
+                        self.error_totalstep1 =None;
+                        self.error_tva = None;
                         let activities = StepTwoo {
                             id: 0,
                             user_id: self.user_id.unwrap_or_default(),
@@ -370,7 +384,7 @@ impl Component for StepTwo {
                     .set_item("user_id", &new_activities.id.to_string())
                     .unwrap();
                 let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&AppRoute::FormEntreprise);
+                navigator.push(&AppRoute::PlanFinancement);
                 true
             }
             Msg::LoadEntreprise(entreprise) => {
@@ -592,7 +606,19 @@ impl Component for StepTwo {
                         <tbody>
                             <tr>
                                 <td class="border px-4 py-2">{ "TVA applicable" }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">
+                                    {
+                                        if let Some(ref message) = self.error_tva {
+                                            html! {
+                                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                                    { message }
+                                                </div>
+                                            }
+                                        } else {
+                                            html! { <></> }
+                                        }
+                                    }
+                                </td>
                                 <td class="border px-4 py-2">
                                  <div class="relative inline-block w-full">
                                     <select
@@ -609,6 +635,7 @@ impl Component for StepTwo {
                                         <option value="5.5">{ "5.5%" }</option>
                                         <option value="10">{ "10%" }</option>
                                         <option value="20">{ "20%" }</option>
+                                        <option value="-1.0">{"Choix TVA"}</option>
                                     </select>
                                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>

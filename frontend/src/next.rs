@@ -357,7 +357,6 @@ impl Component for FormEntreprise {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        log::info!("Rendering view. Submitted: {}", self.submitted);
 
             html! {
                 <div class="flex flex-col min-h-screen">

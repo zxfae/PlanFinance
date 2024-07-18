@@ -1,6 +1,7 @@
 mod home;
 mod next;
 mod stepone;
+mod pfinancement;
 
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -8,6 +9,7 @@ use home::FormModel;
 use next::FormEntreprise;
 use stepone::StepTwo;
 use wasm_bindgen::prelude::*;
+use crate::pfinancement::PlanFinancement;
 
 //Handling routes
 #[derive(Routable, PartialEq, Clone, Debug)]
@@ -18,6 +20,8 @@ enum AppRoute {
     FormEntreprise,
     #[at("/successed")]
     StepTwo,
+    #[at("/planfinancement")]
+    PlanFinancement,
 }
 
 #[function_component(App)]
@@ -34,6 +38,7 @@ fn switch(routes: AppRoute) -> Html {
         AppRoute::Home => html! { <FormModel /> },
         AppRoute::FormEntreprise => html! { <FormEntreprise /> },
         AppRoute::StepTwo => html! { <StepTwo /> },
+        AppRoute::PlanFinancement => html! {< PlanFinancement/>},
     }
 }
 #[wasm_bindgen(start)]

@@ -15,7 +15,7 @@ pub struct StepTwoo {
     interprofession: i32,
     formation: i32,
     prodjour: i64,
-    tva: i8,
+    tva: f32,
     moyprix: f64,
     donttva: f64,
     totalservice: i64,
@@ -34,7 +34,7 @@ pub struct StepTwo {
     interprofession: i32,
     formation: i32,
     prodjour: i64,
-    tva: i8,
+    tva: f32,
     moyprix: f64,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
@@ -60,7 +60,7 @@ pub enum Msg {
     UpdateInterprofession(i32),
     UpdateFormation(i32),
     UpdateProdjour(i64),
-    UpdateTva(i8),
+    UpdateTva(f32),
     UpdateMoyPrix(f64),
     CalculatePouJTTX,
     CalculePourNon,
@@ -130,7 +130,7 @@ impl Component for StepTwo {
             interprofession: 0,
             formation: 0,
             prodjour: 0,
-            tva: 0,
+            tva: 0.0,
             moyprix: 0.0,
             entreprise: None,
             clone_jrsttx: None,
@@ -594,18 +594,26 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">{ "TVA applicable" }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
+                                 <div class="relative inline-block w-full">
+                                    <select
+                                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                                         value={self.tva.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
+                                        onchange={ctx.link().callback(|e: Event| {
                                             let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i8>() {
+                                            match input.value().parse::<f32>() {
                                                 Ok(value) => Msg::UpdateTva(value),
-                                                Err(_) => Msg::UpdateTva(0),
+                                                Err(_) => Msg::UpdateTva(0.0),
                                             }
                                         })}
-                                    />
+                                    >
+                                        <option value="5.5">{ "5.5%" }</option>
+                                        <option value="10">{ "10%" }</option>
+                                        <option value="20">{ "20%" }</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>
+                                    </div>
+                                </div>
                                 </td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>

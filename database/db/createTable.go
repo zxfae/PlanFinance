@@ -58,7 +58,7 @@ func CreateTableActivite(db *sql.DB) error {
 		formation INTEGER,
 		prodjour INTEGER,
 		prodan INTEGER,
-		tva INTEGER,
+		tva REAL,
 		moyprix REAL,
 		donttva REAL,
 		totalservice INTEGER,

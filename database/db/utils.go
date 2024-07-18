@@ -43,7 +43,7 @@ type Activites struct {
 	Formation       int     `json:"formation"`
 	Prodjour        int     `json:"prodjour"`
 	Prodan          int     `json:"prodan"`
-	Tva             int     `json:"tva"`
+	Tva             float32 `json:"tva"`
 	Moyprix         float64 `json:"moyprix"`
 	TotalService    int     `json:"totalservice"`
 	Donttva         float64 `json:"donttva"`

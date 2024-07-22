@@ -127,3 +127,40 @@ func GetEntreprise(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func GetActivite(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user_id", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	var act Activites
+	err = Db.QueryRow(
+		`SELECT id, user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, totalservice, donttva, totalmoyprix, htjours, ttcann, tvaann, htcanann 
+		 FROM Activites 
+		 WHERE user_id = ?`, userID,
+	).Scan(
+		&act.ID, &act.UserId, &act.Production, &act.Entretien, &act.Clientele, &act.Interprofession, &act.Formation, &act.Prodjour, &act.Prodan,
+		&act.Tva, &act.Moyprix, &act.Totalmoyprix, &act.Donttva, &act.TotalService, &act.Htjours, &act.Ttcann, &act.Tvaann, &act.Htcanann,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Activites not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(act); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+	}
+}

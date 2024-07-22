@@ -9,15 +9,6 @@ async fn index() -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
-#[get("/users")]
-async fn get_users() -> Result<HttpResponse> {
-    let response = reqwest::get("http://localhost:8080/get_user")
-        .await
-        .expect("Failed to send request");
-    let body = response.text().await.expect("Failed to read response body");
-    Ok(HttpResponse::Ok().body(body))
-}
-
 #[get("/success")]
 async fn success() -> impl Responder {
     let html = std::fs::read_to_string("./frontend/static/index.html").unwrap();
@@ -50,7 +41,6 @@ async fn main() -> std::io::Result<()> {
             .service(success)
             .service(successed)
             .service(planfinancement)
-            .service(get_users)
             .service(fs::Files::new("/static/pkg", "./frontend/pkg").show_files_listing())
             .service(fs::Files::new("/static", "./frontend/static").show_files_listing())
     })

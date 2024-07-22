@@ -101,7 +101,6 @@ func AddActivites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Log for get ID and compare with ID user
 	act.ID = int(id)
 	log.Printf("Act inserted with ID: %d\n", act.ID)
 

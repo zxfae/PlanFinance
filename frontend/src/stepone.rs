@@ -405,27 +405,27 @@ impl Component for StepTwo {
             <div class="flex flex-col min-h-screen">
                 { header() }
                 <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
-                    <div class="drop-shadow-md text-center text-gray-600 text-4xl font-semibold mb-20">
+                    <div class="drop-shadow-md text-center text-gray-600 text-2xl font-semibold m-5">
                         <h1>{ "Répartition Temps de Travail / d'activité" }</h1>
                         <div class="text-center text-gray-600 text-2xl font-semibold m-2">
                             <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
                         </div>
                     </div>
-                    <table class=" mb-4 border-collapse border-separate border border-gray-900 w-2/4">
+                    <table class="bg-orange-100 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] mb-1 border-collapse border-separate border border-gray-900 w-2/4">
                         <thead>
-                            <tr class="bg-orange-100">
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Répartition temps d'activité" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Jours en Entreprise" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Pourcentage" }</th>
+                            <tr>
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border px-4 py-2">{ "Production - vente = CA" }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - vente = CA" }</td>
+                                <td class="border-solid border-2 text-left text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
                                         type="text"
                                         value={self.production.to_string()}
                                         oninput={ctx.link().callback(|e: InputEvent| {
@@ -437,18 +437,30 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.production }</td>
-                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border-solid border-2 bg-white text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
+                                <td>{""}</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Rentrée d'argent positive" }</td>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2 text-emerald-600">{ format!("{}%", self.pourcentagejrsent) }</td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent positive" }</td>
+                                <td>{""}</td>
+                                <td>{""}</td>
+                                <td class="border-solid border-2 bg-white text-right text-emerald-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcentagejrsent) }</td>
                             </tr>
+                        </tbody>
+                    </table>
+                    <table class="bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] mb-2 border-collapse border-separate border border-gray-900 w-2/4">
+                        <thead>
+                            <tr class="bg-orange-100 border-gray-900">
+                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
+                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             <tr>
-                                <td class="border px-4 py-2">{ "Entretien / Maintenance ..." }</td>
-                                <td class="border px-4 py-2">
+                                <td class="text-orange-500 font-medium hover:font-bold px-4 py-2">{ "Entretien / Maintenance ..." }</td>
+                                <td class="border px-4">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -466,7 +478,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Gestion clients, Devis, Facture..." }</td>
+                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Gestion clients, Devis, Facture..." }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -485,7 +497,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Interprofession" }</td>
+                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Interprofession" }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -504,7 +516,7 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Formation" }</td>
+                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Formation" }</td>
                                 <td class="border px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -520,15 +532,16 @@ impl Component for StepTwo {
                                     />
                                 </td>
                                 <td class="border px-4 py-2">{ self.formation }</td>
+                                <td class="border px-4 py-2"></td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Rentrée d'argent nulle" }</td>
+                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Rentrée d'argent nulle" }</td>
                                 <td class="border px-4 py-2">{""}</td>
                                 <td class="border px-4 py-2">{""}</td>
                                 <td class="border px-4 py-2 text-red-600">{ format!("{}%", self.pourcetagenon) }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border px-4 py-2">{""}</td>
                                 <td class="border px-4 py-2">
                                     {
                                         if let Some(ref message) = self.error_totalstep1 {
@@ -543,7 +556,8 @@ impl Component for StepTwo {
                                     }
                                 </td>
                                 <td class="border px-4 py-2">{ self.view_total_form() }</td>
-                                <td class="border px-4 py-2">{
+                                <td class="border px-4 py-2">
+                            {
                             if let Some(ref message) = self.error_percent {
                                 html! {
                                     <div class="mb-2 text-center text-sm font-semibold text-red-500">
@@ -553,16 +567,30 @@ impl Component for StepTwo {
                             } else {
                                 html! { <></> }
                             }
-                        }</td>
+                                }</td>
                             </tr>
                         </tbody>
                     </table>
-
-                    <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
-
+                    <div class="w-full max-w-md">
+                            <form class="" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                                e.prevent_default();
+                                Msg::Submit
+                            })}>
+                            <div class="flex items-center justify-center">
+                                    <button
+                                    class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="submit"
+                                    disabled={self.submitted}
+                                    >
+                                    { "SUIVANT" }
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+            <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
                     <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
-                        <thead>
-                            <tr class="bg-orange-100">
+                        <thead class="bg-white">
+                            <tr class="">
                                 <th class="px-4 py-2 text-gray-700 font-semibold">{ "Prestation" }</th>
                                 <th class="px-4 py-2 text-gray-700 font-semibold">{ "Production/Encaissement" }</th>
                             </tr>
@@ -588,6 +616,27 @@ impl Component for StepTwo {
                             <tr>
                                 <td class="border px-4 py-2">{ "Production - Service - Vente / an" }</td>
                                 <td class="border px-4 py-2 text-emerald-600 text-right">{format!("{}", self.totalservice)}</td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2">{""}</td>
+                                <td class="border px-4 py-2">
+                                    <div class="w-full max-w-md">
+                                    <form class="" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                                        e.prevent_default();
+                                        Msg::Submit
+                                    })}>
+                                        <div class="flex items-center justify-center">
+                                            <button
+                                                class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                                type="submit"
+                                                disabled={self.submitted}
+                                            >
+                                                { "SUIVANT" }
+                                            </button>
+                                        </div>
+                                    </form>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -680,7 +729,7 @@ impl Component for StepTwo {
                     </table>
 
                     <div class="w-full max-w-md">
-                        <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                        <form class="mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
                             Msg::Submit
                         })}>

@@ -303,13 +303,13 @@ impl Component for StepTwo {
             Msg::Submit => {
                 if !self.submitted {
                     if self.pourcetagenon + self.pourcentagejrsent > 100 {
-                        self.error_percent = Some("Erreur : Il n'est pas autorisé de dépasser le nombre de jours à positionner".to_string());
+                        self.error_percent = Some("Il n'est pas autorisé de dépasser le nombre de jours à positionner".to_string());
                         true
                     } else if self.total != 0 {
-                        self.error_totalstep1 = Some("Erreur : Il vous reste des jours à positionner".to_string());
+                        self.error_totalstep1 = Some("Mauvais positionnement".to_string());
                         true
                     } else if self.tva == -1.0{
-                        self.error_tva = Some("Erreur : Mettez à jour votre TVA".to_string());
+                        self.error_tva = Some("Mettez à jour votre TVA".to_string());
                         true
                     } else if self.moyprix == 0.0 {
                         true
@@ -411,9 +411,9 @@ impl Component for StepTwo {
                             <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
                         </div>
                     </div>
-                    <table class="bg-orange-100 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] mb-1 border-collapse border-separate border border-gray-900 w-2/4">
+                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
                         <thead>
-                            <tr>
+                            <tr class="bg-orange-100">
                                 <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
                                 <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
                                 <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
@@ -423,7 +423,7 @@ impl Component for StepTwo {
                         <tbody>
                             <tr>
                                 <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - vente = CA" }</td>
-                                <td class="border-solid border-2 text-left text-zinc-600 text-base font-semibold px-4 py-2">
+                                <td class="border-solid border-2 text-right text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -435,32 +435,33 @@ impl Component for StepTwo {
                                                 Err(_) => Msg::UpdateProduction(0),
                                             }
                                         })}
+                                    required=true
                                     />
                                 </td>
-                                <td class="border-solid border-2 bg-white text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
-                                <td>{""}</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
                             </tr>
                             <tr>
                                 <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent positive" }</td>
-                                <td>{""}</td>
-                                <td>{""}</td>
-                                <td class="border-solid border-2 bg-white text-right text-emerald-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcentagejrsent) }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-emerald-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcentagejrsent) }</td>
                             </tr>
                         </tbody>
                     </table>
-                    <table class="bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] mb-2 border-collapse border-separate border border-gray-900 w-2/4">
+                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
                         <thead>
-                            <tr class="bg-orange-100 border-gray-900">
-                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
+                            <tr class="bg-orange-100">
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="text-orange-500 font-medium hover:font-bold px-4 py-2">{ "Entretien / Maintenance ..." }</td>
-                                <td class="border px-4">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Entretien / Maintenance" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -472,14 +473,15 @@ impl Component for StepTwo {
                                                 Err(_) => Msg::UpdateEntretien(0),
                                             }
                                         })}
+                                        required=true
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.entretien }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.entretien }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
                             </tr>
                             <tr>
-                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Gestion clients, Devis, Facture..." }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Gestion, Devis, Facture" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -491,14 +493,15 @@ impl Component for StepTwo {
                                                 Err(_) => Msg::UpdateClientele(0),
                                             }
                                         })}
+                                        required=true
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.clientele }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.clientele }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
                             </tr>
                             <tr>
-                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Interprofession" }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Interprofession" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -510,14 +513,15 @@ impl Component for StepTwo {
                                                 Err(_) => Msg::UpdateInterprofession(0),
                                             }
                                         })}
+                                        required=true
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.interprofession }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.interprofession }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
                             </tr>
                             <tr>
-                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Formation" }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Formation" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -529,24 +533,25 @@ impl Component for StepTwo {
                                                 Err(_) => Msg::UpdateFormation(0),
                                             }
                                         })}
+                                        required=true
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.formation }</td>
-                                <td class="border px-4 py-2"></td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.formation }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
                             </tr>
                             <tr>
-                                <td class="text-orange-500 font-medium hover:font-bold border px-4 py-2">{ "Rentrée d'argent nulle" }</td>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2 text-red-600">{ format!("{}%", self.pourcetagenon) }</td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent nulle" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-red-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcetagenon) }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2"></td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     {
                                         if let Some(ref message) = self.error_totalstep1 {
                                             html! {
-                                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                                <div class="text-center text-sm font-semibold text-red-500">
                                                     { message }
                                                 </div>
                                             }
@@ -555,12 +560,12 @@ impl Component for StepTwo {
                                         }
                                     }
                                 </td>
-                                <td class="border px-4 py-2">{ self.view_total_form() }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{ self.view_total_form() }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                             {
                             if let Some(ref message) = self.error_percent {
                                 html! {
-                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                    <div class="text-center text-sm font-semibold text-red-500">
                                         { message }
                                     </div>
                                 }
@@ -587,18 +592,17 @@ impl Component for StepTwo {
                             </div>
                         </form>
                     </div>
-            <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
-                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
-                        <thead class="bg-white">
-                            <tr class="">
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Prestation" }</th>
-                                <th class="px-4 py-2 text-gray-700 font-semibold">{ "Production/Encaissement" }</th>
+                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
+                        <thead>
+                            <tr class="bg-orange-100">
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Prestation" }</th>
+                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Production/Encaissement" }</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border px-4 py-2">{ "Production - Service - Vente / jour" }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / jour" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -614,47 +618,23 @@ impl Component for StepTwo {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Production - Service - Vente / an" }</td>
-                                <td class="border px-4 py-2 text-emerald-600 text-right">{format!("{}", self.totalservice)}</td>
-                            </tr>
-                            <tr>
-                                <td class="border px-4 py-2">{""}</td>
-                                <td class="border px-4 py-2">
-                                    <div class="w-full max-w-md">
-                                    <form class="" onsubmit={ctx.link().callback(|e: SubmitEvent| {
-                                        e.prevent_default();
-                                        Msg::Submit
-                                    })}>
-                                        <div class="flex items-center justify-center">
-                                            <button
-                                                class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                                type="submit"
-                                                disabled={self.submitted}
-                                            >
-                                                { "SUIVANT" }
-                                            </button>
-                                        </div>
-                                    </form>
-                                    </div>
-                                </td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / an" }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right  text-zinc-600 text-base font-semibold px-4 py-2">{self.totalservice}</td>
                             </tr>
                         </tbody>
                     </table>
-
-                    <hr class="my-1 border-t-2 border-orange-400 w-2/4" />
-
-                    <table class="table-auto mb-4 border-collapse border-separate border border-gray-900 w-2/4">
+                    <table class="table-auto mb-4 border-collapse border-separate border-2 border-orange-400 w-2/4">
                         <thead>
                             <tr class="bg-orange-100">
-                                <th class="px-4 py-2">{ "Moyenne prix de vente" }</th>
-                                <th class="px-4 py-2">{ "HT" }</th>
-                                <th class="px-4 py-2">{ "TVA" }</th>
-                                <th class="px-4 py-2">{ "TTC" }</th>
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Moyenne prix de vente" }</th>
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "HT" }</th>
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TVA" }</th>
+                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TTC" }</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border px-4 py-2">{ "TVA applicable" }</td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "TVA applicable" }</td>
                                 <td class="border px-4 py-2">
                                     {
                                         if let Some(ref message) = self.error_tva {
@@ -694,8 +674,8 @@ impl Component for StepTwo {
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "Moyenne prix de vente" }</td>
-                                <td class="border px-4 py-2">
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Moyenne prix de vente" }</td>
+                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
                                     <input
                                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                         type="text"
@@ -710,20 +690,20 @@ impl Component for StepTwo {
                                         })}
                                     />
                                 </td>
-                                <td class="border px-4 py-2">{ self.donttva.to_string() }</td>
-                                <td class="border px-4 py-2">{ self.totalmoyprix.to_string() }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.donttva.to_string() }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.totalmoyprix.to_string() }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "CA journalier" }</td>
-                                <td class="border px-4 py-2">{ self.htjours.to_string() }</td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA journalier" }</td>
+                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.htjours.to_string() }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                                 <td class="border px-4 py-2">{ "" }</td>
                             </tr>
                             <tr>
-                                <td class="border px-4 py-2">{ "CA annuel" }</td>
-                                <td class="border px-4 py-2">{ self.htcanann.to_string() }</td>
-                                <td class="border px-4 py-2">{ self.tvaann.to_string() }</td>
-                                <td class="border px-4 py-2 text-orange-400">{ self.ttcann.to_string() }</td>
+                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA annuel" }</td>
+                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.htcanann.to_string() }</td>
+                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.tvaann.to_string() }</td>
+                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.ttcann.to_string() }</td>
                             </tr>
                         </tbody>
                     </table>

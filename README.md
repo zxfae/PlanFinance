@@ -19,6 +19,13 @@ sudo apt install golang
 cd PlanFinance/ cargo run --package backend
 ```
 
+### If u have blank page
+```bash
+cd frontend/ npm run build:css
+```
+```bash
+cd PlanFinance/ wasm-pack build frontend --target web
+```
 ### Golang(make sure you have install && the correct version of golang)
 ```bash
 cd PlanFinance/database go run .

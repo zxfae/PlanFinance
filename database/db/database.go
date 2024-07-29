@@ -106,12 +106,12 @@ func GetEntreprise(w http.ResponseWriter, r *http.Request) {
 
 	var entreprise Entreprises
 	err = Db.QueryRow(
-		`SELECT id, user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp 
+		`SELECT id, user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp, jan, fev, mar, avr, avr, mai, juin, jui, aout, sept, oct, nov, dec 
 		 FROM Entreprises 
 		 WHERE user_id = ?`, userID,
 	).Scan(
 		&entreprise.ID, &entreprise.UserID, &entreprise.Name, &entreprise.Date, &entreprise.Codeape, &entreprise.Status,
-		&entreprise.Jrsttx, &entreprise.Jrsweek, &entreprise.Jrsferies, &entreprise.Jrscp,
+		&entreprise.Jrsttx, &entreprise.Jrsweek, &entreprise.Jrsferies, &entreprise.Jrscp, &entreprise.Jan, &entreprise.Fev, &entreprise.Mar, &entreprise.Avr, &entreprise.Mai, &entreprise.Juin, &entreprise.Jui, &entreprise.Aout, &entreprise.Sept, &entreprise.Oct, &entreprise.Nov, &entreprise.Dec,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -143,12 +143,12 @@ func GetActivite(w http.ResponseWriter, r *http.Request) {
 
 	var act Activites
 	err = Db.QueryRow(
-		`SELECT id, user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, totalservice, donttva, totalmoyprix, htjours, ttcann, tvaann, htcanann 
+		`SELECT id, user_id, production, entretien, clientele, interprofession, formation, prodjour, totalservice, tva, moyprix, donttva, totalmoyprix, htjours, ttcann, tvaann, htcanann 
 		 FROM Activites 
 		 WHERE user_id = ?`, userID,
 	).Scan(
-		&act.ID, &act.UserId, &act.Production, &act.Entretien, &act.Clientele, &act.Interprofession, &act.Formation, &act.Prodjour, &act.Prodan,
-		&act.Tva, &act.Moyprix, &act.Totalmoyprix, &act.Donttva, &act.TotalService, &act.Htjours, &act.Ttcann, &act.Tvaann, &act.Htcanann,
+		&act.ID, &act.UserId, &act.Production, &act.Entretien, &act.Clientele, &act.Interprofession, &act.Formation, &act.Prodjour, &act.TotalService,
+		&act.Tva, &act.Moyprix, &act.Donttva, &act.Totalmoyprix, &act.Htjours, &act.Ttcann, &act.Tvaann, &act.Htcanann,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

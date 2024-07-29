@@ -82,14 +82,14 @@ func AddActivites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation, prodjour, prodan, tva, moyprix, totalmoyprix, donttva, totalservice, htjours, ttcann, tvaann, htcanann) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := Db.Prepare("INSERT INTO Activites(user_id, production, entretien, clientele, interprofession, formation, prodjour, totalservice, tva, moyprix, donttva, totalmoyprix, htjours, htcanann, tvaann, ttcann) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation, act.Prodjour, act.Prodan, act.Tva, act.Moyprix, act.Totalmoyprix, act.Donttva, act.TotalService, act.Htjours, act.Ttcann, act.Tvaann, act.Htcanann)
+	result, err := stmt.Exec(act.UserId, act.Production, act.Entretien, act.Clientele, act.Interprofession, act.Formation, act.Prodjour, act.TotalService, act.Tva, act.Moyprix, act.Donttva, act.Totalmoyprix, act.Htjours, act.Htcanann, act.Tvaann, act.Ttcann)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

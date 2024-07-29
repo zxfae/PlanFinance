@@ -42,14 +42,13 @@ type Activites struct {
 	Interprofession int     `json:"interprofession"`
 	Formation       int     `json:"formation"`
 	Prodjour        int     `json:"prodjour"`
-	Prodan          int     `json:"prodan"`
+	TotalService    int     `json:"totalservice"`
 	Tva             float32 `json:"tva"`
 	Moyprix         float64 `json:"moyprix"`
-	TotalService    int     `json:"totalservice"`
 	Donttva         float64 `json:"donttva"`
 	Totalmoyprix    float64 `json:"totalmoyprix"`
 	Htjours         float64 `json:"htjours"`
-	Ttcann          float64 `json:"ttcann"`
-	Tvaann          float64 `json:"tvaann"`
 	Htcanann        float64 `json:"htcanann"`
+	Tvaann          float64 `json:"tvaann"`
+	Ttcann          float64 `json:"ttcann"`
 }

@@ -106,7 +106,7 @@ func GetEntreprise(w http.ResponseWriter, r *http.Request) {
 
 	var entreprise Entreprises
 	err = Db.QueryRow(
-		`SELECT id, user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp, jan, fev, mar, avr, avr, mai, juin, jui, aout, sept, oct, nov, dec 
+		`SELECT id, user_id, name, date, codeape, status, jrsttx, jrsweek, jrsferies, jrscp, jan, fev, mar, avr, mai, juin, jui, aout, sept, oct, nov, dec 
 		 FROM Entreprises 
 		 WHERE user_id = ?`, userID,
 	).Scan(

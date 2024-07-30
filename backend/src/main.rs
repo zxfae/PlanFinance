@@ -25,8 +25,8 @@ async fn successed() -> impl Responder {
         .body(html)
 }
 
-#[get("/planfinancement")]
-async fn planfinancement() -> impl Responder {
+#[get("/recapone")]
+async fn recapone() -> impl Responder {
     let html = std::fs::read_to_string("./frontend/static/index.html").unwrap();
     HttpResponse::Ok()
         .content_type("text/html")
@@ -40,7 +40,7 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             .service(success)
             .service(successed)
-            .service(planfinancement)
+            .service(recapone)
             .service(fs::Files::new("/static/pkg", "./frontend/pkg").show_files_listing())
             .service(fs::Files::new("/static", "./frontend/static").show_files_listing())
     })

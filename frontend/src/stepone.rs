@@ -384,7 +384,7 @@ impl Component for StepTwo {
                     .set_item("user_id", &new_activities.id.to_string())
                     .unwrap();
                 let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&AppRoute::PlanFinancement);
+                navigator.push(&AppRoute::RecapOne);
                 true
             }
             Msg::LoadEntreprise(entreprise) => {
@@ -576,22 +576,6 @@ impl Component for StepTwo {
                             </tr>
                         </tbody>
                     </table>
-                    <div class="w-full max-w-md">
-                            <form class="" onsubmit={ctx.link().callback(|e: SubmitEvent| {
-                                e.prevent_default();
-                                Msg::Submit
-                            })}>
-                            <div class="flex items-center justify-center">
-                                    <button
-                                    class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                    type="submit"
-                                    disabled={self.submitted}
-                                    >
-                                    { "SUIVANT" }
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                     <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
                         <thead>
                             <tr class="bg-orange-100">

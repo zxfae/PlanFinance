@@ -62,15 +62,15 @@ pub enum Msg {
     LoadEntrepriseError,
 }
 
-// Définition du composant PlanFinancement
-pub struct PlanFinancement {
+// Définition du composant recap
+pub struct RecapOne {
     user_id: Option<i32>,
     current_step: usize,
     activites: Option<Activites>,
     entreprise: Option<Entreprise>,
 }
 
-impl Component for PlanFinancement {
+impl Component for RecapOne {
     type Message = Msg;
     type Properties = ();
 
@@ -167,7 +167,7 @@ impl Component for PlanFinancement {
     }
 }
 
-impl PlanFinancement {
+impl RecapOne {
     fn view_activites(&self) -> Html {
         if let Some(activites) = &self.activites {
             html! {

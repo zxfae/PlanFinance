@@ -12,33 +12,27 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 sudo apt install golang
 ```
 
-## Usage
+# Usage
 
-### Rust(make sure you have install && the correct version of golang)
-```bash
-cd PlanFinance/ cargo run --package backend
-```
-
-### If u have blank page
+## First to build this project
 ```bash
 cd frontend/ npm run build:css
 ```
 ```bash
 cd PlanFinance/ wasm-pack build frontend --target web
 ```
-### Golang(make sure you have install && the correct version of golang)
+
+## Start server && db
+```bash
+cd PlanFinance/ cargo run --package backend
+```
 ```bash
 cd PlanFinance/database go run .
 ```
 
-### Bash for auto update frontend ctrl + s
-```bash
-cd PlanFinance/ ./build.sh
-```
-
 ## Launch
 ```bash
-http://localhost:8000 or http://127.0.0.1:8000
+http://localhost:8000 OR http://127.0.0.1:8000
 ```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first

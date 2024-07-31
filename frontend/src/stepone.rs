@@ -213,7 +213,7 @@ impl Component for StepTwo {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
                         if let Some(entreprise) = &self.entreprise {
-                            self.pourcentagejrsent = ((self.production as f64) * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
+                            self.pourcentagejrsent = ((self.production as f64).round() * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
                         }
                     } else {
                         log::warn!("Pas de division possible, jrsttx == 0");
@@ -229,7 +229,7 @@ impl Component for StepTwo {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx != 0 {
                         if let Some(entreprise) = &self.entreprise {
-                            self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64) * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
+                            self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64).round() * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
                         }
                     } else {
                         log::warn!("Pas de division possible, jrsttx == 0");

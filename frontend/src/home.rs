@@ -162,7 +162,7 @@ impl Component for FormModel {
                     <div class="w-full max-w-xl mx-auto pt-9 flex">
                         <div class="flex space-x-30 flex-col items-center justify-center">
                             <img src="https://www.svgrepo.com/show/483373/free-whiteboard-7.svg" alt="whiteboard" width="70" height="70"/>
-                            <p class="text-center pl-4 text-2xl font-serif font-medium text-gray-700">{"Générer votre business plan"}</p>
+                            <p class="text-center pl-4 text-2xl font-serif font-medium text-gray-700">{"Générez votre business plan"}</p>
                         </div>
                         <div class="flex flex-col items-center justify-center pl-4">
                             <img src="https://www.svgrepo.com/show/507651/document-download.svg" alt="document download" width="70" height="70"/>

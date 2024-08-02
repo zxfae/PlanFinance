@@ -70,14 +70,20 @@ func InitMainDb() {
 }
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := r.URL.Query().Get("user_id")
 	if id == "" {
-		http.Error(w, "Missing user ID", http.StatusBadRequest)
+		http.Error(w, "Missing user ID 1", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Missing user_id", http.StatusBadRequest)
 		return
 	}
 
 	var user User
-	err := Db.QueryRow("SELECT * FROM Users WHERE id = ?", id).Scan(&user.ID, &user.Lastname, &user.Firstname)
+	err = Db.QueryRow("SELECT * FROM Users WHERE id = ?", userID).Scan(&user.ID, &user.Lastname, &user.Firstname)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "User not found", http.StatusNotFound)
@@ -88,7 +94,9 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func GetEntreprise(w http.ResponseWriter, r *http.Request) {

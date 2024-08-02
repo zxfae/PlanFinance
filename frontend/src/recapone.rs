@@ -1,3 +1,4 @@
+use std::fmt::format;
 use log::log;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -6,7 +7,7 @@ use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
 use plotters::prelude::*;
-use plotters::style::full_palette::{GREY_A700, ORANGE_200, ORANGE_50};
+use plotters::style::full_palette::{GREY_A700, ORANGE_100, ORANGE_200, ORANGE_50, ORANGE_500};
 use plotters_canvas::CanvasBackend;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -58,11 +59,21 @@ pub struct Entreprise {
     dec: i8,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Users {
+    id: i32,
+    lastname: String,
+    firstname: String,
+}
+
 pub enum Msg {
     LoadActivites(Activites),
     LoadActivitesError,
     LoadEntreprise(Entreprise),
     LoadEntrepriseError,
+    LoadUsers(Users),
+    LoadUsersError,
+    DrawChart,
 }
 
 pub struct RecapOne {
@@ -70,6 +81,7 @@ pub struct RecapOne {
     current_step: usize,
     activites: Option<Activites>,
     entreprise: Option<Entreprise>,
+    users: Option<Users>,
 }
 
 impl Component for RecapOne {
@@ -117,6 +129,20 @@ impl Component for RecapOne {
                     Msg::LoadEntrepriseError
                 }
             });
+
+            ctx.link().send_future(async move {
+                let url = format!("http://localhost:8080/get_user?user_id={}", user_id);
+                log::info!("Requesting users from: {}", url);
+                let response = Request::get(&url).send().await.unwrap();
+                if response.ok() {
+                    log::info!("Successfully fetched users");
+                    let user: Users = response.json().await.unwrap();
+                    Msg::LoadUsers(user)
+                } else {
+                    log::error!("Failed to fetch users with status: {}", response.status());
+                    Msg::LoadUsersError
+                }
+            });
         } else {
             log::error!("No user ID found in local storage");
         }
@@ -126,6 +152,7 @@ impl Component for RecapOne {
             current_step: 1,
             activites: None,
             entreprise: None,
+            users: None,
         }
     }
 
@@ -141,31 +168,49 @@ impl Component for RecapOne {
             }
             Msg::LoadEntreprise(entreprise) => {
                 self.entreprise = Some(entreprise);
-                if let Some(ref entreprise) = self.entreprise {
-                    self.draw_chart(entreprise);
-                }
                 true
             }
             Msg::LoadEntrepriseError => {
                 self.entreprise = None;
                 true
             }
+            Msg::LoadUsers(users) => {
+                self.users = Some(users);
+                true
+            }
+            Msg::LoadUsersError => {
+                self.users = None;
+                true
+            }
+            Msg::DrawChart => {
+                if let Some(ref entreprise) = self.entreprise {
+                    self.draw_chart(entreprise);
+                }
+                false
+            }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class="flex flex-col min-h-screen">
+            if let Some(entreprise) = &self.entreprise{
+                <div class="flex flex-col min-h-screen">
                 {header()}
                 <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
                     <div class="flex flex-row w-full justify-center">
+                        <h1>{format!("donnees de l'entreprise {}", entreprise.name)}</h1>
                         {self.view_activites()}
                         {self.view_entreprise()}
-                       <canvas id="chart" width=800 height=600></canvas>
+                        {self.view_users()}
+                        <canvas id="chart" width=800 height=600></canvas>
+                    </div>
+                    <div>
+                        <button onclick={ctx.link().callback(|_| Msg::DrawChart)}>{ "Jours Travaillés" }</button>
                     </div>
                 </div>
                 {footer()}
             </div>
+            }
         }
     }
 }
@@ -175,8 +220,6 @@ impl RecapOne {
         if let Some(activites) = &self.activites {
             html! {
                 <div>
-                    <p>{ format!("ID: {}", activites.id) }</p>
-                    <p>{ format!("User ID: {}", activites.user_id) }</p>
                     <p>{ format!("Production: {}", activites.production) }</p>
                     <p>{ format!("Entretien: {}", activites.entretien) }</p>
                     <p>{ format!("Clientele: {}", activites.clientele) }</p>
@@ -205,32 +248,35 @@ impl RecapOne {
         if let Some(entreprise) = &self.entreprise {
             html! {
                 <div>
-                    <p>{ format!("ID: {}", entreprise.id) }</p>
-                    <p>{ format!("User ID: {}", entreprise.user_id) }</p>
+                    <h1>{format!("Donnees de l'entreprise: {}",entreprise.name)}</h1>
                     <p>{ format!("Name: {}", entreprise.name) }</p>
                     <p>{ format!("Date: {}", entreprise.date) }</p>
                     <p>{ format!("Code APE: {}", entreprise.codeape) }</p>
+                    <p>{format!("Status: {}", entreprise.status)}</p>
                     <p>{ format!("Jours travaillés: {}", entreprise.jrsttx) }</p>
                     <p>{ format!("Jours week-end: {}", entreprise.jrsweek) }</p>
                     <p>{ format!("Jours fériés: {}", entreprise.jrsferies) }</p>
                     <p>{ format!("Jours CP: {}", entreprise.jrscp) }</p>
-                    <p>{ format!("Janvier: {}", entreprise.jan) }</p>
-                    <p>{ format!("Février: {}", entreprise.fev) }</p>
-                    <p>{ format!("Mars: {}", entreprise.mar) }</p>
-                    <p>{ format!("Avril: {}", entreprise.avr) }</p>
-                    <p>{ format!("Mai: {}", entreprise.mai) }</p>
-                    <p>{ format!("Juin: {}", entreprise.juin) }</p>
-                    <p>{ format!("Juillet: {}", entreprise.jui) }</p>
-                    <p>{ format!("Août: {}", entreprise.aout) }</p>
-                    <p>{ format!("Septembre: {}", entreprise.sept) }</p>
-                    <p>{ format!("Octobre: {}", entreprise.oct) }</p>
-                    <p>{ format!("Novembre: {}", entreprise.nov) }</p>
-                    <p>{ format!("Décembre: {}", entreprise.dec) }</p>
                 </div>
             }
         } else {
             html! {
                 <p>{ "Loading entreprises..." }</p>
+            }
+        }
+    }
+
+    fn view_users(&self) -> Html {
+        if let Some(users) = &self.users {
+            html! {
+                <div>
+                    <p>{ format!("Lastname: {}", users.lastname) }</p>
+                    <p>{ format!("Firstname: {}", users.firstname) }</p>
+                </div>
+            }
+        } else {
+            html! {
+                <p>{ "Loading users..." }</p>
             }
         }
     }
@@ -277,7 +323,7 @@ impl RecapOne {
             .unwrap();
 
         chart.configure_mesh()
-            .x_labels(11)
+            .x_labels(12)
             .x_label_formatter(&|&x| {
                 if x < 12 {
                     months[x as usize].to_string()
@@ -295,18 +341,17 @@ impl RecapOne {
                 AreaSeries::new(
                     data.iter().map(|&(x,y)|(x,y)),
                     0,
-                    &ORANGE_50.mix(0.2),
+                    &ORANGE_100.mix(0.4),
                 )
-                    .border_style(&ORANGE_200),
+                    .border_style(&ORANGE_500),
             ).unwrap();
 
         chart
             .draw_series(
                 data.iter()
-                    .map(|&(x, y)| Circle::new((x, y), 5, GREY_A700.filled())),
+                    .map(|&(x, y)| Circle::new((x, y), 5, ORANGE_500.filled())),
             )
             .unwrap();
-
         root.present().unwrap();
     }
 }

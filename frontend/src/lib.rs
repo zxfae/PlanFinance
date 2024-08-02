@@ -50,7 +50,7 @@ fn header() -> Html {
     let title = "PlanFinance : Créez votre business plan facilement et gratuitement".to_string();
     html! {
         <header class="border-solid border-b-2 border-orange-400 w-full text-center py-6 bg-zinc-50">
-            <h1 class="text-3xl font-serif text-gray-800 mb-2 font-semibold">{ title }</h1>
+            <h1 class="text-3xl font-serif text-gray-8z00 mb-2">{ title }</h1>
             <a href="https://github.com/zxfae" class="text-gray-500 hover:text-gray-700" aria-label="My Github">
                 <svg width="90" height="90" viewBox="0 0 250 250" class="animate-pulse border-solid border-b-1 border-orange-200" style="fill:#fff; color:rgb(251 146 60); position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
                     <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>

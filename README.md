@@ -1,3 +1,5 @@
+![Alt text](/img/planfinance.png "Home Page")
+
 # PlanFinance
 PlanFinance WebApp written in Rust.
 Using Yew && tailwindCSS

@@ -112,7 +112,7 @@ impl Component for FormModel {
                         </div>
                     </div>
                     <div class="w-full max-w-xl mx-auto">
-                        <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                        <form class="border-solid border-2 border-orange-400 bg-white rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
                             Msg::Submit
                         })}>

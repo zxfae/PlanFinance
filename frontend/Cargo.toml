@@ -16,6 +16,8 @@ wasm-bindgen-futures = "0.4.42"
 regex = "1.10.5"
 plotters = "0.3.6"
 plotters-canvas = "0.3.0"
+reqwest = "0.12.5"
+thiserror = "1.0.61"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

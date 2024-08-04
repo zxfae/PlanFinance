@@ -329,7 +329,7 @@ impl FormEntreprise {
                     })}>
                         <div class="mb-4">
                             { self.view_box_title() }
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="name">{ "Nom de votre entreprise" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="name">{ "Nom de votre entreprise" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="name"
@@ -344,7 +344,7 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="date">{ "Date" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="date">{ "Date" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="date"
@@ -360,7 +360,7 @@ impl FormEntreprise {
                         {
                             if let Some(ref message) = self.date_err {
                                 html! {
-                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                    <div class="mb-2 text-m text-center font-semibold text-red-500">
                                         { message }
                                     </div>
                                 }
@@ -370,7 +370,7 @@ impl FormEntreprise {
                         }
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="codeape">{ "Code APE" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="codeape">{ "Code APE" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="codeape"
@@ -385,7 +385,7 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="status">{ "Statut" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="status">{ "Statut" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="status"
@@ -435,7 +435,7 @@ impl FormEntreprise {
                     })}>
                         <div class="mb-6">
                             { self.view_form_deux() }
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsttx">{ "Jours travaillés dans l'année" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="jrsttx">{ "Jours travaillés dans l'année" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsttx"
@@ -452,7 +452,7 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsweek">{ "Jours week-end" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="jrsweek">{ "Jours week-end" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsweek"
@@ -469,7 +469,7 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrsferies">{ "Jours fériés" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="jrsferies">{ "Jours fériés" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrsferies"
@@ -486,7 +486,7 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-sm font-semibold mb-2" for="jrscp">{ "Jours congés payés" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="jrscp">{ "Jours congés payés" }</label>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 id="jrscp"
@@ -507,7 +507,7 @@ impl FormEntreprise {
                         {
                             if let Some(ref message) = self.error_msg {
                                 html! {
-                                    <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                    <div class="mb-2 text-center text-m text-center font-semibold text-red-500">
                                         { message }
                                     </div>
                                 }
@@ -545,9 +545,10 @@ impl FormEntreprise {
                             e.prevent_default();
                             EntrepriseMsg::Submit
                         })}>
-
-                        {self.view_form_trois()}
-                        <div class="flex justify-center mb-4">
+                        <div class="mb-6 mt-6">
+                            {self.view_form_trois()}
+                        </div>
+                        <div class="flex justify-center mb-6">
                         <table class="table-auto text-xl">
                             <thead>
                                 <tr class="bg-orange-100">
@@ -557,7 +558,7 @@ impl FormEntreprise {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Janvier" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Janvier" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -574,7 +575,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Février" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Février" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -591,7 +592,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Mars" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Mars" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -608,7 +609,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Avril" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Avril" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -625,7 +626,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Mai" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Mai" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -642,7 +643,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Juin" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Juin" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -659,7 +660,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Juillet" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Juillet" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -676,7 +677,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Août" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Août" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -693,7 +694,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Septembre" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Septembre" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -710,7 +711,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Octobre" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Octobre" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -727,7 +728,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Novembre" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Novembre" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -744,7 +745,7 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-2 py-1">{ "Décembre" }</td>
+                                    <td class="text-orange-500 text-lg font-medium border px-2 py-1">{ "Décembre" }</td>
                                     <td class="border px-2 py-1">
                                         <input
                                             class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -799,7 +800,7 @@ impl FormEntreprise {
 
     fn view_box_title(&self) -> Html {
         html! {
-            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+            <div class="text-center text-2xl font-medium mb-4">
                 { "Formulaire d'entreprise" }
             </div>
         }
@@ -807,7 +808,7 @@ impl FormEntreprise {
 
     fn view_form_deux(&self) -> Html {
         html! {
-            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+            <div class="text-center text-2xl font-medium mb-4">
                 { "Décompte des Jours Travaillés et Non Travaillés" }
             </div>
         }
@@ -815,7 +816,7 @@ impl FormEntreprise {
 
     fn view_form_trois(&self) -> Html {
         html! {
-            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+            <div class="text-center text-2xl font-medium mb-4">
                 { "Répartition mensuelle des jours de travail" }
             </div>
         }

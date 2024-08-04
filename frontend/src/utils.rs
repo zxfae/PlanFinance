@@ -173,7 +173,6 @@ pub struct FormActivities {
     pub tvaann: f64,
     pub ttcann: f64,
     pub htjours: f64,
-    pub current_step: usize,
     pub error_percent: Option<String>,
     pub error_tva: Option<String>,
     pub error_totalstep1: Option<String>,

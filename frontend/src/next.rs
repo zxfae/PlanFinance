@@ -2,13 +2,8 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use web_sys::HtmlInputElement;
 use reqwasm::http::Request;
-use serde::{Deserialize, Serialize};
-#[warn(unused_imports)]
-use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
 use crate::{AppRoute, header, footer};
-extern crate regex;
-use regex::Regex;
 use crate::utils::{Entreprise, EntrepriseMsg, FormEntreprise};
 use crate::modals::date_test;
 

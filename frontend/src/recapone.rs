@@ -1,42 +1,15 @@
-use std::fmt::format;
-use log::log;
 use yew::prelude::*;
-use yew_router::prelude::*;
-use web_sys::{HtmlInputElement, HtmlCanvasElement, console};
-use serde::{Serialize, Deserialize};
+use web_sys::{HtmlCanvasElement};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{Entreprise, User};
+use crate::utils::{Entreprise, User, Activities};
 use plotters::prelude::*;
 use plotters::style::full_palette::{GREY_A700, ORANGE_100, ORANGE_200, ORANGE_50, ORANGE_500};
 use plotters_canvas::CanvasBackend;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Activites {
-    id: i32,
-    user_id: i32,
-    production: i32,
-    entretien: i32,
-    clientele: i32,
-    interprofession: i32,
-    formation: i32,
-    prodjour: i64,
-    tva: f32,
-    moyprix: f64,
-    donttva: f64,
-    totalservice: i64,
-    totalmoyprix: f64,
-    htcanann: f64,
-    tvaann: f64,
-    ttcann: f64,
-    htjours: f64,
-}
-
-
 pub enum Msg {
-    LoadActivites(Activites),
+    LoadActivites(Activities),
     LoadActivitesError,
     LoadEntreprise(Entreprise),
     LoadEntrepriseError,
@@ -46,9 +19,7 @@ pub enum Msg {
 }
 
 pub struct RecapOne {
-    user_id: Option<i32>,
-    current_step: usize,
-    activites: Option<Activites>,
+    activites: Option<Activities>,
     entreprise: Option<Entreprise>,
     users: Option<User>,
 }
@@ -77,7 +48,7 @@ impl Component for RecapOne {
                 let response = Request::get(&url).send().await.unwrap();
                 if response.ok() {
                     log::info!("Successfully fetched activities");
-                    let activites: Activites = response.json().await.unwrap();
+                    let activites: Activities = response.json().await.unwrap();
                     Msg::LoadActivites(activites)
                 } else {
                     log::error!("Failed to fetch activities with status: {}", response.status());
@@ -117,8 +88,6 @@ impl Component for RecapOne {
         }
 
         Self {
-            user_id,
-            current_step: 1,
             activites: None,
             entreprise: None,
             users: None,

@@ -1,7 +1,6 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use web_sys::{HtmlInputElement};
-use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
 use crate::utils::{Entreprise, Activities, FormActivities, ActivitiesMsg};
@@ -58,7 +57,6 @@ impl Component for FormActivities {
             tvaann: 0.0,
             ttcann: 0.0,
             htjours: 0.0,
-            current_step:1,
             error_percent: None,
             error_totalstep1: None,
             error_tva: None,
@@ -646,24 +644,6 @@ impl Component for FormActivities {
 }
 
 impl FormActivities {
-    fn view_cloned_jrsttx(&self) -> Html {
-        if let Some(cloned_jrsttx) = self.clone_jrsttx {
-            if let Some(ref entreprise) = self.entreprise {
-                html! {
-                    <p class="text-gray-700">
-                        { format!(
-                            "Jours travaillés: {}",
-                            cloned_jrsttx - (entreprise.jrsweek as i32) - (entreprise.jrscp as i32) - (entreprise.jrsferies as i32)
-                        ) }
-                    </p>
-                }
-            } else {
-                html! { <p class="text-gray-700">{ "Loading entreprise data..." }</p> }
-            }
-        } else {
-            html! { <p class="text-gray-700">{ "No cloned jrsttx available" }</p> }
-        }
-    }
 
     fn view_total_form(&self) -> Html{
         html!{

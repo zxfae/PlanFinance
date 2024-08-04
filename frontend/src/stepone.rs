@@ -4,86 +4,10 @@ use web_sys::{HtmlInputElement};
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{Entreprise};
+use crate::utils::{Entreprise, Activities, FormActivities, ActivitiesMsg};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct StepTwoo {
-    id: i32,
-    user_id: i32,
-    production: i32,
-    entretien: i32,
-    clientele: i32,
-    interprofession: i32,
-    formation: i32,
-    prodjour: i64,
-    tva: f32,
-    moyprix: f64,
-    donttva: f64,
-    totalservice: i64,
-    totalmoyprix: f64,
-    htcanann: f64,
-    tvaann: f64,
-    ttcann: f64,
-    htjours: f64,
-}
-
-pub struct StepTwo {
-    user_id: Option<i32>,
-    production: i32,
-    entretien: i32,
-    clientele: i32,
-    interprofession: i32,
-    formation: i32,
-    prodjour: i64,
-    tva: f32,
-    moyprix: f64,
-    entreprise: Option<Entreprise>,
-    clone_jrsttx: Option<i32>,
-    pourcentagejrsent: f32,
-    pourcetagenon: f32,
-    totalservice: i64,
-    donttva: f64,
-    totalmoyprix: f64,
-    htcanann: f64,
-    tvaann: f64,
-    ttcann: f64,
-    htjours: f64,
-    current_step: usize,
-    error_percent: Option<String>,
-    error_tva: Option<String>,
-    error_totalstep1: Option<String>,
-    total: i32,
-    submitted: bool,
-}
-
-pub enum Msg {
-    UpdateProduction(i32),
-    UpdateEntretien(i32),
-    UpdateClientele(i32),
-    UpdateInterprofession(i32),
-    UpdateFormation(i32),
-    UpdateProdjour(i64),
-    UpdateTva(f32),
-    UpdateMoyPrix(f64),
-    CalculatePouJTTX,
-    CalculePourNon,
-    CalculateTotalS1,
-    UpdateTotalService,
-    CalculateDontTva,
-    CalculateMoyTtTva,
-    CalculateCaAnnHt,
-    CalculcateTvaAnn,
-    CalculateTtcAnn,
-    CalculateHtJours,
-    Submit,
-    SubmissionComplete(StepTwoo),
-    LoadEntreprise(Entreprise),
-    LoadEntrepriseError,
-}
-
-
-impl Component for StepTwo {
-    type Message = Msg;
+impl Component for FormActivities {
+    type Message = ActivitiesMsg;
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
@@ -104,10 +28,10 @@ impl Component for StepTwo {
                 let response = Request::get(&url).send().await.unwrap();
                 if response.ok() {
                     let entreprise: Entreprise = response.json().await.unwrap();
-                    Msg::LoadEntreprise(entreprise)
+                    ActivitiesMsg::LoadEntreprise(entreprise)
                 } else {
                     log::error!("Failed to fetch entreprise");
-                    Msg::LoadEntrepriseError
+                    ActivitiesMsg::LoadEntrepriseError
                 }
             });
         }
@@ -145,59 +69,59 @@ impl Component for StepTwo {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             // Mise à jour des valeurs
-            Msg::UpdateProduction(value) => {
+            ActivitiesMsg::UpdateProduction(value) => {
                 self.production = value;
-                ctx.link().send_message(Msg::CalculatePouJTTX);
-                ctx.link().send_message(Msg::CalculateTotalS1);
-                ctx.link().send_message(Msg::CalculateHtJours);
+                ctx.link().send_message(ActivitiesMsg::CalculatePouJTTX);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculateHtJours);
                 true
             }
-            Msg::UpdateEntretien(value) => {
+            ActivitiesMsg::UpdateEntretien(value) => {
                 self.entretien = value;
-                ctx.link().send_message(Msg::CalculePourNon);
-                ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculePourNon);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
                 true
             }
-            Msg::UpdateClientele(value) => {
+            ActivitiesMsg::UpdateClientele(value) => {
                 self.clientele = value;
-                ctx.link().send_message(Msg::CalculePourNon);
-                ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculePourNon);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
                 true
             }
-            Msg::UpdateInterprofession(value) => {
+            ActivitiesMsg::UpdateInterprofession(value) => {
                 self.interprofession = value;
-                ctx.link().send_message(Msg::CalculePourNon);
-                ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculePourNon);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
                 true
             }
-            Msg::UpdateFormation(value) => {
+            ActivitiesMsg::UpdateFormation(value) => {
                 self.formation = value;
-                ctx.link().send_message(Msg::CalculePourNon);
-                ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculePourNon);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
                 true
             }
-            Msg::UpdateProdjour(value) => {
+            ActivitiesMsg::UpdateProdjour(value) => {
                 self.prodjour = value;
-                ctx.link().send_message(Msg::UpdateTotalService);
+                ctx.link().send_message(ActivitiesMsg::UpdateTotalService);
                 true
             }
-            Msg::UpdateTva(value) => {
+            ActivitiesMsg::UpdateTva(value) => {
                 self.tva = value;
-                ctx.link().send_message(Msg::CalculateDontTva);
+                ctx.link().send_message(ActivitiesMsg::CalculateDontTva);
                 true
             }
-            Msg::UpdateMoyPrix(value) => {
+            ActivitiesMsg::UpdateMoyPrix(value) => {
                 self.moyprix = value;
-                ctx.link().send_message(Msg::CalculateDontTva);
-                ctx.link().send_message(Msg::CalculateMoyTtTva);
-                ctx.link().send_message(Msg::CalculateCaAnnHt);
-                ctx.link().send_message(Msg::CalculcateTvaAnn);
-                ctx.link().send_message(Msg::CalculateTtcAnn);
-                ctx.link().send_message(Msg::CalculateHtJours);
+                ctx.link().send_message(ActivitiesMsg::CalculateDontTva);
+                ctx.link().send_message(ActivitiesMsg::CalculateMoyTtTva);
+                ctx.link().send_message(ActivitiesMsg::CalculateCaAnnHt);
+                ctx.link().send_message(ActivitiesMsg::CalculcateTvaAnn);
+                ctx.link().send_message(ActivitiesMsg::CalculateTtcAnn);
+                ctx.link().send_message(ActivitiesMsg::CalculateHtJours);
                 true
             }
 
-            Msg::CalculatePouJTTX => {
+            ActivitiesMsg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx > 0 {
                         if let Some(entreprise) = &self.entreprise {
@@ -224,7 +148,7 @@ impl Component for StepTwo {
                 }
                 true
             }
-            Msg::CalculePourNon => {
+            ActivitiesMsg::CalculePourNon => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if clone_jrsttx > 0 {
                         if let Some(entreprise) = &self.entreprise {
@@ -251,7 +175,7 @@ impl Component for StepTwo {
                 }
                 true
             }
-            Msg::CalculateTotalS1 => {
+            ActivitiesMsg::CalculateTotalS1 => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
                     if let Some(entreprise) = &self.entreprise {
                         self.total = clone_jrsttx -
@@ -268,7 +192,7 @@ impl Component for StepTwo {
                 true
             }
             // Calcul du total service
-            Msg::UpdateTotalService => {
+            ActivitiesMsg::UpdateTotalService => {
                 self.totalservice = self.production as i64 * self.prodjour;
                 log::info!("Total service updated: {}", self.totalservice);
                 if self.totalservice <= 0 {
@@ -276,37 +200,37 @@ impl Component for StepTwo {
                 }
                 true
             }
-            Msg::CalculateDontTva => {
+            ActivitiesMsg::CalculateDontTva => {
                 self.donttva = (self.moyprix * self.tva as f64) / 100.0;
                 if self.donttva <= 0.0{
                     self.donttva = 0.0;
                 }
                 true
             }
-            Msg::CalculateMoyTtTva => {
+            ActivitiesMsg::CalculateMoyTtTva => {
                 self.totalmoyprix = self.moyprix + self.donttva;
                 true
             }
-            Msg::CalculateCaAnnHt => {
+            ActivitiesMsg::CalculateCaAnnHt => {
                 self.htcanann = self.totalservice as f64 * self.moyprix;
                 true
             }
-            Msg::CalculcateTvaAnn => {
+            ActivitiesMsg::CalculcateTvaAnn => {
                 self.tvaann = (self.totalservice as f64 * self.moyprix) * self.tva as f64 / 100.0;
                 if self.tvaann <= 0.0{
                     self.tvaann = 0.0;
                 }
                 true
             }
-            Msg::CalculateTtcAnn => {
+            ActivitiesMsg::CalculateTtcAnn => {
                 self.ttcann = (self.totalservice as f64 * self.moyprix) + self.tvaann;
                 true
             }
-            Msg::CalculateHtJours => {
+            ActivitiesMsg::CalculateHtJours => {
                 self.htjours = (self.totalservice as f64 * self.moyprix) / self.production as f64;
                 true
             }
-            Msg::Submit => {
+            ActivitiesMsg::Submit => {
                 if !self.submitted {
                     if self.pourcetagenon + self.pourcentagejrsent  > 100.0 {
                         self.error_percent = Some("Il n'est pas autorisé de dépasser le nombre de jours à positionner".to_string());
@@ -323,7 +247,7 @@ impl Component for StepTwo {
                         self.error_percent = None;
                         self.error_totalstep1 =None;
                         self.error_tva = None;
-                        let activities = StepTwoo {
+                        let activities = Activities {
                             id: 0,
                             user_id: self.user_id.unwrap_or_default(),
                             production: self.production,
@@ -354,22 +278,22 @@ impl Component for StepTwo {
                             match response {
                                 Ok(resp) => {
                                     if resp.ok() {
-                                        let new_activities: Result<StepTwoo, _> = resp.json().await;
+                                        let new_activities: Result<Activities, _> = resp.json().await;
                                         match new_activities {
-                                            Ok(new_activities) => Msg::SubmissionComplete(new_activities),
+                                            Ok(new_activities) => ActivitiesMsg::SubmissionComplete(new_activities),
                                             Err(e) => {
                                                 log::error!("Failed to parse response: {:?}", e);
-                                                Msg::Submit
+                                                ActivitiesMsg::Submit
                                             }
                                         }
                                     } else {
                                         log::error!("Failed to submit activities: {}", resp.status());
-                                        Msg::Submit
+                                        ActivitiesMsg::Submit
                                     }
                                 }
                                 Err(e) => {
                                     log::error!("Request failed: {:?}", e);
-                                    Msg::Submit
+                                    ActivitiesMsg::Submit
                                 }
                             }
                         });
@@ -380,7 +304,7 @@ impl Component for StepTwo {
                     false
                 }
             }
-            Msg::SubmissionComplete(new_activities) => {
+            ActivitiesMsg::SubmissionComplete(new_activities) => {
                 log::info!("Submission completed.");
                 web_sys::window()
                     .unwrap()
@@ -393,13 +317,13 @@ impl Component for StepTwo {
                 navigator.push(&AppRoute::RecapOne);
                 true
             }
-            Msg::LoadEntreprise(entreprise) => {
+            ActivitiesMsg::LoadEntreprise(entreprise) => {
                 self.clone_jrsttx = Some(entreprise.jrsttx);
                 self.entreprise = Some(entreprise);
-                ctx.link().send_message(Msg::CalculateTotalS1);
+                ctx.link().send_message(ActivitiesMsg::CalculateTotalS1);
                 true
             }
-            Msg::LoadEntrepriseError => {
+            ActivitiesMsg::LoadEntrepriseError => {
                 log::error!("Failed to load entreprise");
                 false
             }
@@ -437,8 +361,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i32>() {
-                                            Ok(value) => Msg::UpdateProduction(value),
-                                            Err(_) => Msg::UpdateProduction(0),
+                                            Ok(value) => ActivitiesMsg::UpdateProduction(value),
+                                            Err(_) => ActivitiesMsg::UpdateProduction(0),
                                         }
                                     })}
                                 required=true
@@ -475,8 +399,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i32>() {
-                                            Ok(value) => Msg::UpdateEntretien(value),
-                                            Err(_) => Msg::UpdateEntretien(0),
+                                            Ok(value) => ActivitiesMsg::UpdateEntretien(value),
+                                            Err(_) => ActivitiesMsg::UpdateEntretien(0),
                                         }
                                     })}
                                     required=true
@@ -495,8 +419,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i32>() {
-                                            Ok(value) => Msg::UpdateClientele(value),
-                                            Err(_) => Msg::UpdateClientele(0),
+                                            Ok(value) => ActivitiesMsg::UpdateClientele(value),
+                                            Err(_) => ActivitiesMsg::UpdateClientele(0),
                                         }
                                     })}
                                     required=true
@@ -515,8 +439,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i32>() {
-                                            Ok(value) => Msg::UpdateInterprofession(value),
-                                            Err(_) => Msg::UpdateInterprofession(0),
+                                            Ok(value) => ActivitiesMsg::UpdateInterprofession(value),
+                                            Err(_) => ActivitiesMsg::UpdateInterprofession(0),
                                         }
                                     })}
                                     required=true
@@ -535,8 +459,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i32>() {
-                                            Ok(value) => Msg::UpdateFormation(value),
-                                            Err(_) => Msg::UpdateFormation(0),
+                                            Ok(value) => ActivitiesMsg::UpdateFormation(value),
+                                            Err(_) => ActivitiesMsg::UpdateFormation(0),
                                         }
                                     })}
                                     required=true
@@ -600,8 +524,8 @@ impl Component for StepTwo {
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<i64>() {
-                                            Ok(value) => Msg::UpdateProdjour(value),
-                                            Err(_) => Msg::UpdateProdjour(0),
+                                            Ok(value) => ActivitiesMsg::UpdateProdjour(value),
+                                            Err(_) => ActivitiesMsg::UpdateProdjour(0),
                                         }
                                     })}
                                 />
@@ -646,8 +570,8 @@ impl Component for StepTwo {
                                     onchange={ctx.link().callback(|e: Event| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         match input.value().parse::<f32>() {
-                                            Ok(value) => Msg::UpdateTva(value),
-                                            Err(_) => Msg::UpdateTva(0.0),
+                                            Ok(value) => ActivitiesMsg::UpdateTva(value),
+                                            Err(_) => ActivitiesMsg::UpdateTva(0.0),
                                         }
                                     })}
                                 >
@@ -674,8 +598,8 @@ impl Component for StepTwo {
                                         let input: HtmlInputElement = e.target_unchecked_into();
                                         let value_str = input.value().replace(',', ".");
                                         match value_str.parse::<f64>() {
-                                            Ok(value) => Msg::UpdateMoyPrix(value),
-                                            Err(_) => Msg::UpdateMoyPrix(0.0),
+                                            Ok(value) => ActivitiesMsg::UpdateMoyPrix(value),
+                                            Err(_) => ActivitiesMsg::UpdateMoyPrix(0.0),
                                         }
                                     })}
                                 />
@@ -701,7 +625,7 @@ impl Component for StepTwo {
                 <div class="w-full max-w-md">
                     <form class="mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
-                        Msg::Submit
+                        ActivitiesMsg::Submit
                     })}>
                         <div class="flex items-center justify-center">
                             <button
@@ -721,7 +645,7 @@ impl Component for StepTwo {
     }
 }
 
-impl StepTwo {
+impl FormActivities {
     fn view_cloned_jrsttx(&self) -> Html {
         if let Some(cloned_jrsttx) = self.clone_jrsttx {
             if let Some(ref entreprise) = self.entreprise {

@@ -3,14 +3,13 @@ mod next;
 mod stepone;
 mod recapone;
 mod utils;
+mod modals;
 
 use yew::prelude::*;
 use yew_router::prelude::*;
-use home::FormModel;
-use next::FormEntreprise;
-use stepone::StepTwo;
 use wasm_bindgen::prelude::*;
 use crate::recapone::RecapOne;
+use crate::utils::{FormHome, FormActivities, FormEntreprise};
 
 //Handling routes
 #[derive(Routable, PartialEq, Clone, Debug)]
@@ -36,9 +35,9 @@ fn app() -> Html {
 
 fn switch(routes: AppRoute) -> Html {
     match routes {
-        AppRoute::Home => html! { <FormModel /> },
+        AppRoute::Home => html! { <FormHome /> },
         AppRoute::FormEntreprise => html! { <FormEntreprise /> },
-        AppRoute::StepTwo => html! { <StepTwo /> },
+        AppRoute::StepTwo => html! { <FormActivities /> },
         AppRoute::RecapOne => html! {< RecapOne/>},
     }
 }

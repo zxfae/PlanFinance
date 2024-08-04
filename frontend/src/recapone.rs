@@ -6,6 +6,7 @@ use web_sys::{HtmlInputElement, HtmlCanvasElement, console};
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
+use crate::utils::{Entreprise, User};
 use plotters::prelude::*;
 use plotters::style::full_palette::{GREY_A700, ORANGE_100, ORANGE_200, ORANGE_50, ORANGE_500};
 use plotters_canvas::CanvasBackend;
@@ -33,45 +34,13 @@ pub struct Activites {
     htjours: f64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Entreprise {
-    id: i32,
-    user_id: i32,
-    name: String,
-    date: String,
-    codeape: String,
-    status: String,
-    jrsttx: i32,
-    jrsweek: i16,
-    jrsferies: i8,
-    jrscp: i8,
-    jan: i8,
-    fev: i8,
-    mar: i8,
-    avr: i8,
-    mai: i8,
-    juin: i8,
-    jui: i8,
-    aout: i8,
-    sept: i8,
-    oct: i8,
-    nov: i8,
-    dec: i8,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Users {
-    id: i32,
-    lastname: String,
-    firstname: String,
-}
 
 pub enum Msg {
     LoadActivites(Activites),
     LoadActivitesError,
     LoadEntreprise(Entreprise),
     LoadEntrepriseError,
-    LoadUsers(Users),
+    LoadUsers(User),
     LoadUsersError,
     DrawChart,
 }
@@ -81,7 +50,7 @@ pub struct RecapOne {
     current_step: usize,
     activites: Option<Activites>,
     entreprise: Option<Entreprise>,
-    users: Option<Users>,
+    users: Option<User>,
 }
 
 impl Component for RecapOne {
@@ -136,7 +105,7 @@ impl Component for RecapOne {
                 let response = Request::get(&url).send().await.unwrap();
                 if response.ok() {
                     log::info!("Successfully fetched users");
-                    let user: Users = response.json().await.unwrap();
+                    let user: User = response.json().await.unwrap();
                     Msg::LoadUsers(user)
                 } else {
                     log::error!("Failed to fetch users with status: {}", response.status());

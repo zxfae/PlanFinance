@@ -4,15 +4,10 @@ use web_sys::HtmlInputElement;
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{HomeMsg, User};
+use crate::utils::{HomeMsg, User, FormHome};
 
-pub struct FormModel {
-    last_name: String,
-    first_name: String,
-    submitted: bool,
-}
 
-impl Component for FormModel {
+impl Component for FormHome {
     type Message = HomeMsg;
     type Properties = ();
 
@@ -167,7 +162,7 @@ impl Component for FormModel {
     }
 }
 
-impl FormModel {
+impl FormHome {
     fn view_box_title(&self) -> Html {
         html! {
             <div class="text-center text-4xl font-medium mb-4">

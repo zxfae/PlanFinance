@@ -9,44 +9,8 @@ use web_sys::console;
 use crate::{AppRoute, header, footer};
 extern crate regex;
 use regex::Regex;
-use crate::utils::{Entreprise, EntrepriseMsg};
-
-//Rust.doc (-) currentFormat
-pub fn date_test(date: &str) -> bool {
-    let date_regex = Regex::new(r"^\d{2}-\d{2}-\d{4}$").unwrap();
-    date_regex.is_match(date)
-}
-
-pub struct FormEntreprise {
-    user_id: i32,
-    name: String,
-    date: String,
-    codeape: String,
-    status: String,
-    jrsttx: i32,
-    jrsweek: i16,
-    jrsferies: i8,
-    jrscp: i8,
-    jan: i8,
-    fev: i8,
-    mar: i8,
-    avr: i8,
-    mai: i8,
-    juin: i8,
-    jui: i8,
-    aout: i8,
-    sept: i8,
-    oct: i8,
-    nov: i8,
-    dec: i8,
-    submitted: bool,
-    current_step: usize,
-    decompte: i32,
-    total: i32,
-    error_msg: Option<String>,
-    date_err:Option<String>,
-    oth_err: Option<String>,
-}
+use crate::utils::{Entreprise, EntrepriseMsg, FormEntreprise};
+use crate::modals::date_test;
 
 impl Component for FormEntreprise {
     type Message = EntrepriseMsg;

@@ -265,7 +265,7 @@ impl Component for FormEntreprise {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
 
-            html! {
+        html! {
                 <div class="flex flex-col min-h-screen">
                     { header() }
                     <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
@@ -306,17 +306,16 @@ impl Component for FormEntreprise {
             }
     }
 }
-
 impl FormEntreprise {
     fn render_step1(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         let class = if self.current_step == 1 {
-            "w-full max-w-md"
+            "w-full max-w-xl"
         } else {
             "w-full max-w-md opacity-50"
         };
 
         html! {
-            <>
+            <div class="flex justify-center items-center h-screen">
                 <div class={class}>
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 1" }</h1>
@@ -411,18 +410,18 @@ impl FormEntreprise {
                         </div>
                     </form>
                 </div>
-            </>
+            </div>
         }
     }
 
     fn render_step2(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         let class = if self.current_step == 2 {
-            "w-full max-w-md"
+            "w-full max-w-xl"
         } else {
             "w-full max-w-md opacity-50"
         };
         html! {
-            <>
+            <div class="flex justify-center items-center h-screen">
                 <div class={class}>
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 2" }</h1>
@@ -527,38 +526,41 @@ impl FormEntreprise {
                         </div>
                     </form>
                 </div>
-            </>
+            </div>
         }
     }
 
     fn render_step3(&self, ctx: &Context<Self>, disabled: bool) -> Html {
         html! {
-            <>
-                <div class="w-full max-w-md mx-auto">
+            <div class="flex justify-center items-center h-screen">
+                <div class="w-full max-w-lg">
                     <div class="text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 3" }</h1>
                     </div>
-                    <div class="text-center text-gray-600 text-2xl font-semibold m-2">
+                    <div class="mb-10 text-center text-gray-600 text-2xl font-semibold m-2">
                         <h1>{ "Cette section calcule les jours travaillés et non travaillés :" }</h1>
                     </div>
-                    <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+                    <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-4 pt-4 pb-4 mb-4"
                         onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
                             EntrepriseMsg::Submit
                         })}>
-                        <table class="table-auto mb-4">
+
+                        {self.view_form_trois()}
+                        <div class="flex justify-center mb-4">
+                        <table class="table-auto text-xl">
                             <thead>
                                 <tr class="bg-orange-100">
-                                    <th class="px-4 py-2">{ "Mois" }</th>
-                                    <th class="px-4 py-2">{ "Nombre de jours" }</th>
+                                    <th class="px-2 py-1">{ "Mois" }</th>
+                                    <th class="px-2 py-1">{ "Nombre de jours" }</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Janvier" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Janvier" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.jan.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -572,10 +574,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Février" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Février" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.fev.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -589,10 +591,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Mars" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Mars" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.mar.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -606,10 +608,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Avril" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Avril" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.avr.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -623,10 +625,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Mai" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Mai" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.mai.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -640,10 +642,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Juin" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Juin" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.juin.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -657,10 +659,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Juillet" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Juillet" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.jui.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -674,10 +676,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Août" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Août" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.aout.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -691,10 +693,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Septembre" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Septembre" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.sept.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -708,10 +710,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Octobre" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Octobre" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.oct.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -725,10 +727,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Novembre" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Novembre" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.nov.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -742,10 +744,10 @@ impl FormEntreprise {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="border px-4 py-2">{ "Décembre" }</td>
-                                    <td class="border px-4 py-2">
+                                    <td class="border px-2 py-1">{ "Décembre" }</td>
+                                    <td class="border px-2 py-1">
                                         <input
-                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                            class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             type="text"
                                             value={self.dec.to_string()}
                                             oninput={ctx.link().callback(|e: InputEvent| {
@@ -760,7 +762,8 @@ impl FormEntreprise {
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="mb-2 text-center text-sm font-semibold text-gray-700">
+                        </div>
+                        <div class="mb-4 text-center text-sm font-semibold text-gray-700">
                             { "Il vous reste " }
                             <div class="text-red-500">
                                 { self.total }
@@ -780,7 +783,7 @@ impl FormEntreprise {
                                 html! { <></> }
                             }
                         }
-                        <div class="flex items-center justify-center">
+                        <div class="mb-10 flex items-center justify-center">
                             <button class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                     type="submit"
                                     disabled={self.submitted || disabled}
@@ -790,7 +793,7 @@ impl FormEntreprise {
                         </div>
                     </form>
                 </div>
-            </>
+            </div>
         }
     }
 
@@ -810,4 +813,11 @@ impl FormEntreprise {
         }
     }
 
+    fn view_form_trois(&self) -> Html {
+        html! {
+            <div class="mb-4 text-xl font-bold text-center text-gray-700">
+                { "Répartition mensuelle des jours de travail" }
+            </div>
+        }
+    }
 }

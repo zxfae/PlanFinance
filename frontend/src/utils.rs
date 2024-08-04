@@ -70,6 +70,7 @@ pub enum EntrepriseMsg {
     UpdateDec(i8),
     CalculateDecompte,
     CalculateTotal,
+    AutoDistribution,
     Submit,
     SubmissionComplete(Entreprise),
 }

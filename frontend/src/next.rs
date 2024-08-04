@@ -9,37 +9,12 @@ use web_sys::console;
 use crate::{AppRoute, header, footer};
 extern crate regex;
 use regex::Regex;
+use crate::utils::{Entreprise, EntrepriseMsg};
 
 //Rust.doc (-) currentFormat
 pub fn date_test(date: &str) -> bool {
     let date_regex = Regex::new(r"^\d{2}-\d{2}-\d{4}$").unwrap();
     date_regex.is_match(date)
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Entreprise {
-    id: i32,
-    user_id: i32,
-    name: String,
-    date: String,
-    codeape: String,
-    status: String,
-    jrsttx: i32,
-    jrsweek: i16,
-    jrsferies: i8,
-    jrscp: i8,
-    jan: i8,
-    fev: i8,
-    mar: i8,
-    avr: i8,
-    mai: i8,
-    juin: i8,
-    jui: i8,
-    aout: i8,
-    sept: i8,
-    oct: i8,
-    nov: i8,
-    dec: i8,
 }
 
 pub struct FormEntreprise {
@@ -73,35 +48,8 @@ pub struct FormEntreprise {
     oth_err: Option<String>,
 }
 
-pub enum Msg {
-    UpdateName(String),
-    UpdateDate(String),
-    UpdateCodeApe(String),
-    UpdateStatus(String),
-    UpdateJrsTTX(i32),
-    UpdateJrsWeek(i16),
-    UpdateJrsFeries(i8),
-    UpdateJrsCp(i8),
-    UpdateJan(i8),
-    UpdateFev(i8),
-    UpdateMar(i8),
-    UpdateAvr(i8),
-    UpdateMai(i8),
-    UpdateJuin(i8),
-    UpdateJui(i8),
-    UpdateAout(i8),
-    UpdateSept(i8),
-    UpdateOct(i8),
-    UpdateNov(i8),
-    UpdateDec(i8),
-    CalculateDecompte,
-    CalculateTotal,
-    Submit,
-    SubmissionComplete(Entreprise),
-}
-
 impl Component for FormEntreprise {
-    type Message = Msg;
+    type Message = EntrepriseMsg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
@@ -155,110 +103,110 @@ impl Component for FormEntreprise {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::UpdateName(value) => {
+            EntrepriseMsg::UpdateName(value) => {
                 self.name = value;
                 true
             }
-            Msg::UpdateDate(value) => {
+            EntrepriseMsg::UpdateDate(value) => {
                 self.date = value;
                 true
             }
-            Msg::UpdateCodeApe(value) => {
+            EntrepriseMsg::UpdateCodeApe(value) => {
                 self.codeape = value;
                 true
             }
-            Msg::UpdateStatus(value) => {
+            EntrepriseMsg::UpdateStatus(value) => {
                 self.status = value;
                 true
             }
-            Msg::UpdateJrsTTX(value) => {
+            EntrepriseMsg::UpdateJrsTTX(value) => {
                 self.jrsttx = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateJrsWeek(value) => {
+            EntrepriseMsg::UpdateJrsWeek(value) => {
                 self.jrsweek = value;
-                ctx.link().send_message(Msg::CalculateDecompte);
+                ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
-            Msg::UpdateJrsFeries(value) => {
+            EntrepriseMsg::UpdateJrsFeries(value) => {
                 self.jrsferies = value;
-                ctx.link().send_message(Msg::CalculateDecompte);
+                ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
-            Msg::UpdateJrsCp(value) => {
+            EntrepriseMsg::UpdateJrsCp(value) => {
                 self.jrscp = value;
-                ctx.link().send_message(Msg::CalculateDecompte);
+                ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
-            Msg::UpdateJan(value) => {
+            EntrepriseMsg::UpdateJan(value) => {
                 self.jan = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateFev(value) => {
+            EntrepriseMsg::UpdateFev(value) => {
                 self.fev = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateMar(value) => {
+            EntrepriseMsg::UpdateMar(value) => {
                 self.mar = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateAvr(value) => {
+            EntrepriseMsg::UpdateAvr(value) => {
                 self.avr = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateMai(value) => {
+            EntrepriseMsg::UpdateMai(value) => {
                 self.mai = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateJuin(value) => {
+            EntrepriseMsg::UpdateJuin(value) => {
                 self.juin = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateJui(value) => {
+            EntrepriseMsg::UpdateJui(value) => {
                 self.jui = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateAout(value) => {
+            EntrepriseMsg::UpdateAout(value) => {
                 self.aout = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateSept(value) => {
+            EntrepriseMsg::UpdateSept(value) => {
                 self.sept = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateOct(value) => {
+            EntrepriseMsg::UpdateOct(value) => {
                 self.oct = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateNov(value) => {
+            EntrepriseMsg::UpdateNov(value) => {
                 self.nov = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::UpdateDec(value) => {
+            EntrepriseMsg::UpdateDec(value) => {
                 self.dec = value;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::CalculateDecompte => {
+            EntrepriseMsg::CalculateDecompte => {
                 self.decompte = self.jrsweek as i32 +
                     self.jrsferies as i32 +
                     self.jrscp as i32;
-                ctx.link().send_message(Msg::CalculateTotal);
+                ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
-            Msg::CalculateTotal => {
+            EntrepriseMsg::CalculateTotal => {
                 self.total = self.jrsttx -
                     self.decompte -
                     self.jan as i32 -
@@ -275,7 +223,7 @@ impl Component for FormEntreprise {
                     self.dec as i32;
                 true
             }
-            Msg::Submit => {
+            EntrepriseMsg::Submit => {
                 if !self.submitted {
                     if self.current_step == 2 && self.total == 0 && self.current_step != 3 || self.current_step == 2 && self.total < 0 && self.current_step != 3 {
                         self.error_msg = Some("Erreur : Aucun jours travaillés".to_string());
@@ -333,10 +281,10 @@ impl Component for FormEntreprise {
                                 if response.ok() {
                                     let new_ent: Entreprise = response.json().await.unwrap();
                                     log::info!("Entreprise created: {:?}", new_ent);
-                                    Msg::SubmissionComplete(new_ent)
+                                    EntrepriseMsg::SubmissionComplete(new_ent)
                                 } else {
                                     log::error!("Failed to submit entreprise");
-                                    Msg::Submit
+                                    EntrepriseMsg::Submit
                                 }
                             });
                             self.submitted = true;
@@ -347,7 +295,7 @@ impl Component for FormEntreprise {
                     false
                 }
             }
-            Msg::SubmissionComplete(new_ent) => {
+            EntrepriseMsg::SubmissionComplete(new_ent) => {
                 log::info!("Submission completed. Entreprise ID: {}", new_ent.id);
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::StepTwo);
@@ -419,7 +367,7 @@ impl FormEntreprise {
                     </div>
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
-                        Msg::Submit
+                        EntrepriseMsg::Submit
                     })}>
                         <div class="mb-4">
                             { self.view_box_title() }
@@ -432,7 +380,7 @@ impl FormEntreprise {
                                 value={self.name.clone()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateName(input.value())
+                                    EntrepriseMsg::UpdateName(input.value())
                                 })}
                                 required=true
                             />
@@ -447,7 +395,7 @@ impl FormEntreprise {
                                 value={self.date.clone()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateDate(input.value())
+                                    EntrepriseMsg::UpdateDate(input.value())
                                 })}
                                 required=true
                             />
@@ -473,7 +421,7 @@ impl FormEntreprise {
                                 value={self.codeape.clone()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateCodeApe(input.value())
+                                    EntrepriseMsg::UpdateCodeApe(input.value())
                                 })}
                                 required=true
                             />
@@ -488,7 +436,7 @@ impl FormEntreprise {
                                 value={self.status.clone()}
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
-                                    Msg::UpdateStatus(input.value())
+                                    EntrepriseMsg::UpdateStatus(input.value())
                                 })}
                                 required=true
                             />
@@ -525,7 +473,7 @@ impl FormEntreprise {
                     </div>
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                         e.prevent_default();
-                        Msg::Submit
+                        EntrepriseMsg::Submit
                     })}>
                         <div class="mb-6">
                             { self.view_form_deux() }
@@ -538,8 +486,8 @@ impl FormEntreprise {
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     match input.value().parse::<i32>() {
-                                        Ok(value) => Msg::UpdateJrsTTX(value),
-                                        Err(_) => Msg::UpdateJrsTTX(0),
+                                        Ok(value) => EntrepriseMsg::UpdateJrsTTX(value),
+                                        Err(_) => EntrepriseMsg::UpdateJrsTTX(0),
                                     }
                                 })}
                                 required=true
@@ -555,8 +503,8 @@ impl FormEntreprise {
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     match input.value().parse::<i16>() {
-                                        Ok(value) => Msg::UpdateJrsWeek(value),
-                                        Err(_) => Msg::UpdateJrsWeek(0),
+                                        Ok(value) => EntrepriseMsg::UpdateJrsWeek(value),
+                                        Err(_) => EntrepriseMsg::UpdateJrsWeek(0),
                                     }
                                 })}
                                 required=true
@@ -572,8 +520,8 @@ impl FormEntreprise {
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     match input.value().parse::<i8>() {
-                                        Ok(value) => Msg::UpdateJrsFeries(value),
-                                        Err(_) => Msg::UpdateJrsFeries(0),
+                                        Ok(value) => EntrepriseMsg::UpdateJrsFeries(value),
+                                        Err(_) => EntrepriseMsg::UpdateJrsFeries(0),
                                     }
                                 })}
                                 required=true
@@ -589,8 +537,8 @@ impl FormEntreprise {
                                 oninput={ctx.link().callback(|e: InputEvent| {
                                     let input: HtmlInputElement = e.target_unchecked_into();
                                     match input.value().parse::<i8>() {
-                                        Ok(value) => Msg::UpdateJrsCp(value),
-                                        Err(_) => Msg::UpdateJrsCp(0),
+                                        Ok(value) => EntrepriseMsg::UpdateJrsCp(value),
+                                        Err(_) => EntrepriseMsg::UpdateJrsCp(0),
                                     }
                                 })}
                                 required=true
@@ -637,7 +585,7 @@ impl FormEntreprise {
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
                         onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
-                            Msg::Submit
+                            EntrepriseMsg::Submit
                         })}>
                         <table class="table-auto mb-4">
                             <thead>
@@ -657,8 +605,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateJan(value),
-                                                    Err(_) => Msg::UpdateJan(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateJan(value),
+                                                    Err(_) => EntrepriseMsg::UpdateJan(0),
                                                 }
                                             })}
                                         />
@@ -674,8 +622,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateFev(value),
-                                                    Err(_) => Msg::UpdateFev(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateFev(value),
+                                                    Err(_) => EntrepriseMsg::UpdateFev(0),
                                                 }
                                             })}
                                         />
@@ -691,8 +639,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateMar(value),
-                                                    Err(_) => Msg::UpdateMar(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateMar(value),
+                                                    Err(_) => EntrepriseMsg::UpdateMar(0),
                                                 }
                                             })}
                                         />
@@ -708,8 +656,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateAvr(value),
-                                                    Err(_) => Msg::UpdateAvr(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateAvr(value),
+                                                    Err(_) => EntrepriseMsg::UpdateAvr(0),
                                                 }
                                             })}
                                         />
@@ -725,8 +673,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateMai(value),
-                                                    Err(_) => Msg::UpdateMai(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateMai(value),
+                                                    Err(_) => EntrepriseMsg::UpdateMai(0),
                                                 }
                                             })}
                                         />
@@ -742,8 +690,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateJuin(value),
-                                                    Err(_) => Msg::UpdateJuin(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateJuin(value),
+                                                    Err(_) => EntrepriseMsg::UpdateJuin(0),
                                                 }
                                             })}
                                         />
@@ -759,8 +707,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateJui(value),
-                                                    Err(_) => Msg::UpdateJui(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateJui(value),
+                                                    Err(_) => EntrepriseMsg::UpdateJui(0),
                                                 }
                                             })}
                                         />
@@ -776,8 +724,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateAout(value),
-                                                    Err(_) => Msg::UpdateAout(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateAout(value),
+                                                    Err(_) => EntrepriseMsg::UpdateAout(0),
                                                 }
                                             })}
                                         />
@@ -793,8 +741,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateSept(value),
-                                                    Err(_) => Msg::UpdateSept(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateSept(value),
+                                                    Err(_) => EntrepriseMsg::UpdateSept(0),
                                                 }
                                             })}
                                         />
@@ -810,8 +758,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateOct(value),
-                                                    Err(_) => Msg::UpdateOct(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateOct(value),
+                                                    Err(_) => EntrepriseMsg::UpdateOct(0),
                                                 }
                                             })}
                                         />
@@ -827,8 +775,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateNov(value),
-                                                    Err(_) => Msg::UpdateNov(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateNov(value),
+                                                    Err(_) => EntrepriseMsg::UpdateNov(0),
                                                 }
                                             })}
                                         />
@@ -844,8 +792,8 @@ impl FormEntreprise {
                                             oninput={ctx.link().callback(|e: InputEvent| {
                                                 let input: HtmlInputElement = e.target_unchecked_into();
                                                 match input.value().parse::<i8>() {
-                                                    Ok(value) => Msg::UpdateDec(value),
-                                                    Err(_) => Msg::UpdateDec(0),
+                                                    Ok(value) => EntrepriseMsg::UpdateDec(value),
+                                                    Err(_) => EntrepriseMsg::UpdateDec(0),
                                                 }
                                             })}
                                         />

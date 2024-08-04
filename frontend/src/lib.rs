@@ -2,6 +2,7 @@ mod home;
 mod next;
 mod stepone;
 mod recapone;
+mod utils;
 
 use yew::prelude::*;
 use yew_router::prelude::*;

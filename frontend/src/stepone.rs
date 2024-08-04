@@ -4,6 +4,7 @@ use web_sys::{HtmlInputElement};
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
+use crate::utils::{Entreprise};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepTwoo {
@@ -38,8 +39,8 @@ pub struct StepTwo {
     moyprix: f64,
     entreprise: Option<Entreprise>,
     clone_jrsttx: Option<i32>,
-    pourcentagejrsent: i32,
-    pourcetagenon: i32,
+    pourcentagejrsent: f32,
+    pourcetagenon: f32,
     totalservice: i64,
     donttva: f64,
     totalmoyprix: f64,
@@ -80,19 +81,6 @@ pub enum Msg {
     LoadEntrepriseError,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Entreprise {
-    id: i32,
-    user_id: i32,
-    name: String,
-    date: String,
-    codeape: String,
-    status: String,
-    jrsttx: i32,
-    jrsweek: i16,
-    jrsferies: i8,
-    jrscp: i8,
-}
 
 impl Component for StepTwo {
     type Message = Msg;
@@ -136,8 +124,8 @@ impl Component for StepTwo {
             moyprix: 0.0,
             entreprise: None,
             clone_jrsttx: None,
-            pourcentagejrsent: 0,
-            pourcetagenon: 0,
+            pourcentagejrsent: 0.0,
+            pourcetagenon: 0.0,
             total: 0,
             totalservice: 0,
             donttva: 0.0,
@@ -211,33 +199,55 @@ impl Component for StepTwo {
 
             Msg::CalculatePouJTTX => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
-                    if clone_jrsttx != 0 {
+                    if clone_jrsttx > 0 {
                         if let Some(entreprise) = &self.entreprise {
-                            self.pourcentagejrsent = ((self.production as f64).round() * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
+                            let denominator = clone_jrsttx as f32 - entreprise.jrsweek as f32 - entreprise.jrscp as f32 - entreprise.jrsferies as f32;
+                            log::info!("Calculating percentage: production = {}, denominator = {}", self.production, denominator);
+                            if denominator > 0.0 {
+                                self.pourcentagejrsent = ((self.production as f32 * 100.0) / denominator * 100.0).round() / 100.0;
+                                log::info!("Updated percentage: {:.2}", self.pourcentagejrsent);
+                            } else {
+                                log::warn!("Denominator is zero or negative, cannot compute percentage");
+                                self.pourcentagejrsent = 0.0;
+                            }
+                        } else {
+                            log::warn!("entreprise data is None");
+                            self.pourcentagejrsent = 0.0;
                         }
                     } else {
-                        log::warn!("Pas de division possible, jrsttx == 0");
-                        self.pourcentagejrsent = 0;
+                        log::warn!("clone_jrsttx is zero or negative");
+                        self.pourcentagejrsent = 0.0;
                     }
                 } else {
-                    log::warn!("clone_jrsttx == none");
-                    self.pourcentagejrsent = 0;
+                    log::warn!("clone_jrsttx is None");
+                    self.pourcentagejrsent = 0.0;
                 }
                 true
             }
             Msg::CalculePourNon => {
                 if let Some(clone_jrsttx) = self.clone_jrsttx {
-                    if clone_jrsttx != 0 {
+                    if clone_jrsttx > 0 {
                         if let Some(entreprise) = &self.entreprise {
-                            self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f64).round() * 100.0 / (clone_jrsttx as f64 - entreprise.jrsweek as f64 - entreprise.jrscp as f64 - entreprise.jrsferies as f64)).round() as i32;
+                            let denominator = clone_jrsttx as f32 - entreprise.jrsweek as f32 - entreprise.jrscp as f32 - entreprise.jrsferies as f32;
+                            log::info!("Calculating percentage for non-productive days: total = {}, denominator = {}", self.entretien + self.clientele + self.interprofession + self.formation, denominator);
+                            if denominator > 0.0 {
+                                self.pourcetagenon = (((self.entretien + self.clientele + self.interprofession + self.formation) as f32 * 100.0) / denominator * 100.0).round() / 100.0;
+                                log::info!("Updated non-productive percentage: {:.2}", self.pourcetagenon);
+                            } else {
+                                log::warn!("Denominator is zero or negative, cannot compute non-productive percentage");
+                                self.pourcetagenon = 0.0;
+                            }
+                        } else {
+                            log::warn!("entreprise data is None");
+                            self.pourcetagenon = 0.0;
                         }
                     } else {
-                        log::warn!("Pas de division possible, jrsttx == 0");
-                        self.pourcetagenon = 0;
+                        log::warn!("clone_jrsttx is zero or negative");
+                        self.pourcetagenon = 0.0;
                     }
                 } else {
-                    log::warn!("clone_jrsttx == none");
-                    self.pourcetagenon = 0;
+                    log::warn!("clone_jrsttx is None");
+                    self.pourcetagenon = 0.0;
                 }
                 true
             }
@@ -259,14 +269,10 @@ impl Component for StepTwo {
             }
             // Calcul du total service
             Msg::UpdateTotalService => {
-                if let Some(clone_jrsttx) = self.clone_jrsttx {
-                    if let Some(entreprise) = &self.entreprise {
-                        self.totalservice = self.production as i64 * self.prodjour;
-                        log::info!("Total service updated: {}", self.totalservice);
-                        if self.totalservice <= 0 {
-                            self.totalservice = 0;
-                        }
-                    }
+                self.totalservice = self.production as i64 * self.prodjour;
+                log::info!("Total service updated: {}", self.totalservice);
+                if self.totalservice <= 0 {
+                    self.totalservice = 0;
                 }
                 true
             }
@@ -302,7 +308,7 @@ impl Component for StepTwo {
             }
             Msg::Submit => {
                 if !self.submitted {
-                    if self.pourcetagenon + self.pourcentagejrsent > 100 {
+                    if self.pourcetagenon + self.pourcentagejrsent  > 100.0 {
                         self.error_percent = Some("Il n'est pas autorisé de dépasser le nombre de jours à positionner".to_string());
                         true
                     } else if self.total != 0 {
@@ -402,316 +408,316 @@ impl Component for StepTwo {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class="flex flex-col min-h-screen">
-                { header() }
-                <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
-                    <div class="drop-shadow-md text-center text-gray-600 text-2xl font-semibold m-5">
-                        <h1>{ "Répartition Temps de Travail / d'activité" }</h1>
-                        <div class="text-center text-gray-600 text-2xl font-semibold m-2">
-                            <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
-                        </div>
-                    </div>
-                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
-                        <thead>
-                            <tr class="bg-orange-100">
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - vente = CA" }</td>
-                                <td class="border-solid border-2 text-right text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.production.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i32>() {
-                                                Ok(value) => Msg::UpdateProduction(value),
-                                                Err(_) => Msg::UpdateProduction(0),
-                                            }
-                                        })}
-                                    required=true
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent positive" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-emerald-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcentagejrsent) }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
-                        <thead>
-                            <tr class="bg-orange-100">
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Entretien / Maintenance" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.entretien.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i32>() {
-                                                Ok(value) => Msg::UpdateEntretien(value),
-                                                Err(_) => Msg::UpdateEntretien(0),
-                                            }
-                                        })}
-                                        required=true
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.entretien }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Gestion, Devis, Facture" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.clientele.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i32>() {
-                                                Ok(value) => Msg::UpdateClientele(value),
-                                                Err(_) => Msg::UpdateClientele(0),
-                                            }
-                                        })}
-                                        required=true
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.clientele }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Interprofession" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.interprofession.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i32>() {
-                                                Ok(value) => Msg::UpdateInterprofession(value),
-                                                Err(_) => Msg::UpdateInterprofession(0),
-                                            }
-                                        })}
-                                        required=true
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.interprofession }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Formation" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.formation.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i32>() {
-                                                Ok(value) => Msg::UpdateFormation(value),
-                                                Err(_) => Msg::UpdateFormation(0),
-                                            }
-                                        })}
-                                        required=true
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.formation }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent nulle" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-red-600 text-base font-semibold px-4 py-2">{ format!("{}%", self.pourcetagenon) }</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2"></td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    {
-                                        if let Some(ref message) = self.error_totalstep1 {
-                                            html! {
-                                                <div class="text-center text-sm font-semibold text-red-500">
-                                                    { message }
-                                                </div>
-                                            }
-                                        } else {
-                                            html! { <></> }
-                                        }
-                                    }
-                                </td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{ self.view_total_form() }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                            {
-                            if let Some(ref message) = self.error_percent {
-                                html! {
-                                    <div class="text-center text-sm font-semibold text-red-500">
-                                        { message }
-                                    </div>
-                                }
-                            } else {
-                                html! { <></> }
-                            }
-                                }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
-                        <thead>
-                            <tr class="bg-orange-100">
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Prestation" }</th>
-                                <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Production/Encaissement" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / jour" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={self.prodjour.to_string()}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<i64>() {
-                                                Ok(value) => Msg::UpdateProdjour(value),
-                                                Err(_) => Msg::UpdateProdjour(0),
-                                            }
-                                        })}
-                                    />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / an" }</td>
-                                <td class="border-solid border-2 bg-white/50 text-right  text-zinc-600 text-base font-semibold px-4 py-2">{self.totalservice}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="table-auto mb-4 border-collapse border-separate border-2 border-orange-400 w-2/4">
-                        <thead>
-                            <tr class="bg-orange-100">
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Moyenne prix de vente" }</th>
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "HT" }</th>
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TVA" }</th>
-                                <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TTC" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "TVA applicable" }</td>
-                                <td class="border px-4 py-2">
-                                    {
-                                        if let Some(ref message) = self.error_tva {
-                                            html! {
-                                                <div class="mb-2 text-center text-sm font-semibold text-red-500">
-                                                    { message }
-                                                </div>
-                                            }
-                                        } else {
-                                            html! { <></> }
-                                        }
-                                    }
-                                </td>
-                                <td class="border px-4 py-2">
-                                 <div class="relative inline-block w-full">
-                                    <select
-                                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-                                        value={self.tva.to_string()}
-                                        onchange={ctx.link().callback(|e: Event| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            match input.value().parse::<f32>() {
-                                                Ok(value) => Msg::UpdateTva(value),
-                                                Err(_) => Msg::UpdateTva(0.0),
-                                            }
-                                        })}
-                                    >
-                                        <option value="5.5">{ "5.5%" }</option>
-                                        <option value="10">{ "10%" }</option>
-                                        <option value="20">{ "20%" }</option>
-                                        <option value="-1.0">{"Choix TVA"}</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>
-                                    </div>
-                                </div>
-                                </td>
-                                <td class="border px-4 py-2">{ "" }</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Moyenne prix de vente" }</td>
-                                <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
-                                    <input
-                                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        type="text"
-                                        value={format!("{:.2}", self.moyprix).replace('.', ",")}
-                                        oninput={ctx.link().callback(|e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            let value_str = input.value().replace(',', ".");
-                                            match value_str.parse::<f64>() {
-                                                Ok(value) => Msg::UpdateMoyPrix(value),
-                                                Err(_) => Msg::UpdateMoyPrix(0.0),
-                                            }
-                                        })}
-                                    />
-                                </td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.donttva.to_string() }</td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.totalmoyprix.to_string() }</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA journalier" }</td>
-                                <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.htjours.to_string() }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
-                                <td class="border px-4 py-2">{ "" }</td>
-                            </tr>
-                            <tr>
-                                <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA annuel" }</td>
-                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.htcanann.to_string() }</td>
-                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.tvaann.to_string() }</td>
-                                <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.ttcann.to_string() }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="w-full max-w-md">
-                        <form class="mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
-                            e.prevent_default();
-                            Msg::Submit
-                        })}>
-                            <div class="flex items-center justify-center">
-                                <button
-                                    class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                    type="submit"
-                                    disabled={self.submitted}
-                                >
-                                    { "SIMULER MON PROJET" }
-                                </button>
-                            </div>
-                        </form>
+        <div class="flex flex-col min-h-screen">
+            { header() }
+            <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                <div class="drop-shadow-md text-center text-gray-600 text-2xl font-semibold m-5">
+                    <h1>{ "Répartition Temps de Travail / d'activité" }</h1>
+                    <div class="text-center text-gray-600 text-2xl font-semibold m-2">
+                        <h1>{ "Nous défendons l'idée que chacun peut créer son business plan facilement et gratuitement" }</h1>
                     </div>
                 </div>
-                { footer() }
+                <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
+                    <thead>
+                        <tr class="bg-orange-100">
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - vente = CA" }</td>
+                            <td class="border-solid border-2 text-right text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.production.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i32>() {
+                                            Ok(value) => Msg::UpdateProduction(value),
+                                            Err(_) => Msg::UpdateProduction(0),
+                                        }
+                                    })}
+                                required=true
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{ format!("{:.2}%", self.pourcentagejrsent) }</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent positive" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-emerald-600 text-base font-semibold px-4 py-2">{ format!("{:.2}%", self.pourcentagejrsent) }</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
+                    <thead>
+                        <tr class="bg-orange-100">
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Répartition temps d'activité" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Nombre de jours" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Jours en Entreprise" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Pourcentage" }</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Entretien / Maintenance" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.entretien.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i32>() {
+                                            Ok(value) => Msg::UpdateEntretien(value),
+                                            Err(_) => Msg::UpdateEntretien(0),
+                                        }
+                                    })}
+                                    required=true
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.entretien }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Gestion, Devis, Facture" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.clientele.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i32>() {
+                                            Ok(value) => Msg::UpdateClientele(value),
+                                            Err(_) => Msg::UpdateClientele(0),
+                                        }
+                                    })}
+                                    required=true
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.clientele }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Interprofession" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.interprofession.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i32>() {
+                                            Ok(value) => Msg::UpdateInterprofession(value),
+                                            Err(_) => Msg::UpdateInterprofession(0),
+                                        }
+                                    })}
+                                    required=true
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.interprofession }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Formation" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.formation.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i32>() {
+                                            Ok(value) => Msg::UpdateFormation(value),
+                                            Err(_) => Msg::UpdateFormation(0),
+                                        }
+                                    })}
+                                    required=true
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.formation }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent nulle" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{""}</td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-red-600 text-base font-semibold px-4 py-2">{ format!("{:.2}%", self.pourcetagenon) }</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2"></td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                {
+                                    if let Some(ref message) = self.error_totalstep1 {
+                                        html! {
+                                            <div class="text-center text-sm font-semibold text-red-500">
+                                                { message }
+                                            </div>
+                                        }
+                                    } else {
+                                        html! { <></> }
+                                    }
+                                }
+                            </td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{ self.view_total_form() }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                        {
+                        if let Some(ref message) = self.error_percent {
+                            html! {
+                                <div class="text-center text-sm font-semibold text-red-500">
+                                    { message }
+                                </div>
+                            }
+                        } else {
+                            html! { <></> }
+                        }
+                            }</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table-auto mb-2 border-collapse border-separate border-2 border-orange-400 w-2/4">
+                    <thead>
+                        <tr class="bg-orange-100">
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Prestation" }</th>
+                            <th class="px-4 py-2 border-solid border-2 text-gray-700 font-semibold text-lg">{ "Production/Encaissement" }</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / jour" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={self.prodjour.to_string()}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<i64>() {
+                                            Ok(value) => Msg::UpdateProdjour(value),
+                                            Err(_) => Msg::UpdateProdjour(0),
+                                        }
+                                    })}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Production - Service - Vente / an" }</td>
+                            <td class="border-solid border-2 bg-white/50 text-right  text-zinc-600 text-base font-semibold px-4 py-2">{self.totalservice}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table-auto mb-4 border-collapse border-separate border-2 border-orange-400 w-2/4">
+                    <thead>
+                        <tr class="bg-orange-100">
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "Moyenne prix de vente" }</th>
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "HT" }</th>
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TVA" }</th>
+                            <th class="border-solid border-2 px-4 py-2 text-gray-700 font-semibold text-lg">{ "TTC" }</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "TVA applicable" }</td>
+                            <td class="border px-4 py-2">
+                                {
+                                    if let Some(ref message) = self.error_tva {
+                                        html! {
+                                            <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                                { message }
+                                            </div>
+                                        }
+                                    } else {
+                                        html! { <></> }
+                                    }
+                                }
+                            </td>
+                            <td class="border px-4 py-2">
+                             <div class="relative inline-block w-full">
+                                <select
+                                    class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                                    value={self.tva.to_string()}
+                                    onchange={ctx.link().callback(|e: Event| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        match input.value().parse::<f32>() {
+                                            Ok(value) => Msg::UpdateTva(value),
+                                            Err(_) => Msg::UpdateTva(0.0),
+                                        }
+                                    })}
+                                >
+                                    <option value="5.5">{ "5.5%" }</option>
+                                    <option value="10">{ "10%" }</option>
+                                    <option value="20">{ "20%" }</option>
+                                    <option value="-1.0">{"Choix TVA"}</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>
+                                </div>
+                            </div>
+                            </td>
+                            <td class="border px-4 py-2">{ "" }</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Moyenne prix de vente" }</td>
+                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">
+                                <input
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    type="text"
+                                    value={format!("{:.2}", self.moyprix).replace('.', ",")}
+                                    oninput={ctx.link().callback(|e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        let value_str = input.value().replace(',', ".");
+                                        match value_str.parse::<f64>() {
+                                            Ok(value) => Msg::UpdateMoyPrix(value),
+                                            Err(_) => Msg::UpdateMoyPrix(0.0),
+                                        }
+                                    })}
+                                />
+                            </td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.donttva.to_string() }</td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.totalmoyprix.to_string() }</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA journalier" }</td>
+                            <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.htjours.to_string() }</td>
+                            <td class="border px-4 py-2">{ "" }</td>
+                            <td class="border px-4 py-2">{ "" }</td>
+                        </tr>
+                        <tr>
+                            <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "CA annuel" }</td>
+                            <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.htcanann.to_string() }</td>
+                            <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.tvaann.to_string() }</td>
+                            <td class="border-solid border-2 text-right bg-white/50 text-zinc-600 text-base font-semibold px-4 py-2">{ self.ttcann.to_string() }</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="w-full max-w-md">
+                    <form class="mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
+                        e.prevent_default();
+                        Msg::Submit
+                    })}>
+                        <div class="flex items-center justify-center">
+                            <button
+                                class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                type="submit"
+                                disabled={self.submitted}
+                            >
+                                { "SIMULER MON PROJET" }
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        }
+            { footer() }
+        </div>
+    }
     }
 }
 

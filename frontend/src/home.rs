@@ -4,6 +4,7 @@ use web_sys::HtmlInputElement;
 use serde::{Serialize, Deserialize};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
+use crate::utils::{HomeMsg, User};
 
 pub struct FormModel {
     last_name: String,
@@ -11,22 +12,8 @@ pub struct FormModel {
     submitted: bool,
 }
 
-pub enum Msg {
-    UpdateLastName(String),
-    UpdateFirstName(String),
-    Submit,
-    SubmissionComplete(User),
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct User {
-    id: i32,
-    lastname: String,
-    firstname: String,
-}
-
 impl Component for FormModel {
-    type Message = Msg;
+    type Message = HomeMsg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
@@ -39,15 +26,15 @@ impl Component for FormModel {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::UpdateLastName(value) => {
+            HomeMsg::UpdateLastName(value) => {
                 self.last_name = value;
                 true
             }
-            Msg::UpdateFirstName(value) => {
+            HomeMsg::UpdateFirstName(value) => {
                 self.first_name = value;
                 true
             }
-            Msg::Submit => {
+            HomeMsg::Submit => {
                 if !self.submitted {
                     let user = User {
                         id: 0,
@@ -66,9 +53,9 @@ impl Component for FormModel {
 
                         if response.ok() {
                             let new_user: User = response.json().await.unwrap();
-                            Msg::SubmissionComplete(new_user)
+                            HomeMsg::SubmissionComplete(new_user)
                         } else {
-                            Msg::Submit
+                            HomeMsg::Submit
                         }
                     });
                     self.submitted = true;
@@ -77,7 +64,7 @@ impl Component for FormModel {
                     false
                 }
             }
-            Msg::SubmissionComplete(new_user) => {
+            HomeMsg::SubmissionComplete(new_user) => {
                 log::info!("Submission completed.");
                 web_sys::window()
                     .unwrap()
@@ -114,7 +101,7 @@ impl Component for FormModel {
                     <div class="w-full max-w-xl mx-auto">
                         <form class="border-solid border-2 border-orange-400 bg-white rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
                             e.prevent_default();
-                            Msg::Submit
+                            HomeMsg::Submit
                         })}>
                             <div class="mb-2">
                                 {self.view_box_title()}
@@ -127,7 +114,7 @@ impl Component for FormModel {
                                     value={self.last_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateLastName(input.value())
+                                        HomeMsg::UpdateLastName(input.value())
                                     })}
                                 required=true
                                 />
@@ -142,7 +129,7 @@ impl Component for FormModel {
                                     value={self.first_name.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: HtmlInputElement = e.target_unchecked_into();
-                                        Msg::UpdateFirstName(input.value())
+                                        HomeMsg::UpdateFirstName(input.value())
                                     })}
                                 required=true
                                 />

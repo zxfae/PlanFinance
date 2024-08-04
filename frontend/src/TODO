@@ -1,1 +1,6 @@
-CA ann HT change
+backend next.rs
+
+reflechir pour lexperience client, notamment sur les pourcentages, what's best way ?
+fix CA journal Nan (float?)
+
+Continuer refactorisation

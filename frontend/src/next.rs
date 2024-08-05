@@ -1,11 +1,12 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement};
+use web_sys::HtmlSelectElement;
 use reqwasm::http::Request;
 use web_sys::console;
 use crate::{AppRoute, header, footer};
-use crate::utils::{Entreprise, EntrepriseMsg, FormEntreprise};
-use crate::modals::{auto_distribute, date_test};
+use crate::modals::{Entreprise, EntrepriseMsg, FormEntreprise};
+use crate::utils::{auto_distribute, date_test};
 
 impl Component for FormEntreprise {
     type Message = EntrepriseMsg;
@@ -33,7 +34,7 @@ impl Component for FormEntreprise {
             name: String::new(),
             date: String::new(),
             codeape: String::new(),
-            status: String::new(),
+            status: String::from("NULL"),
             jrsttx: 0,
             jrsweek: 0,
             jrsferies: 0,
@@ -57,6 +58,7 @@ impl Component for FormEntreprise {
             error_msg: None,
             date_err: None,
             oth_err: None,
+            err_status: None,
         }
     }
 
@@ -211,6 +213,9 @@ impl Component for FormEntreprise {
                         //regexpDate ok
                         self.date_err = Some("Format incorrect (JJ-MM-AAAA)".to_string());
                         true
+                    } else if self.status == "NULL"{
+                        self.err_status = Some("Mettez à jour votre statut d'entreprise".to_string());
+                        true
                     }else {
                         if self.current_step < 3 {
                             self.current_step += 1;
@@ -218,6 +223,7 @@ impl Component for FormEntreprise {
                             self.date_err = None;
                             self.oth_err = None;
                             self.error_msg = None;
+                            self.err_status = None;
                             true
                         } else {
                             let entreprise = Entreprise {
@@ -402,20 +408,43 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="status">{ "Statut" }</label>
-                            <input
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
-                                id="status"
-                                type="text"
-                                placeholder="Statut de votre entreprise"
-                                value={self.status.clone()}
-                                oninput={ctx.link().callback(|e: InputEvent| {
-                                    let input: HtmlInputElement = e.target_unchecked_into();
-                                    EntrepriseMsg::UpdateStatus(input.value())
-                                })}
-                                required=true
-                            />
-                        </div>
+                                <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="status">{ "Statut" }</label>
+                                <div class="relative inline-block w-full">
+                                    <select
+                                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                                        id="status"
+                                        value={self.status.clone()}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlSelectElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    >
+
+                                        <option value="MC">{ "Micro Entreprise (MC)" }</option>
+                                        <option value="EI">{ "Entreprise Individuelle (EI)" }</option>
+                                        <option value="EIRL">{ "Entreprise Individuelle Responsabilité Limitée (EIRL)" }</option>
+                                        <option value="SARL">{ "Société Responsabilité Limitée (SARL)" }</option>
+                                        <option value="SASU">{ "Société Actions Simplifiée Unipersonnelle (SASU)" }</option>
+                                        <option value="SAS">{ "Société Actions Simplifiée (SAS)" }</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>
+                                    </div>
+                                </div>
+                                <div>
+                                {
+                                    if let Some(ref message) = self.err_status{
+                                        html! {
+                                            <div class="mb-2 text-center text-sm font-semibold text-red-500">
+                                                { message }
+                                            </div>
+                                        }
+                                    } else {
+                                        html! { <></> }
+                                    }
+                                }
+                                </div>
+                            </div>
                         <div class="flex items-center justify-center">
                             <button
                                 class="bg-emerald-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

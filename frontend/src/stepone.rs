@@ -3,7 +3,7 @@ use yew_router::prelude::*;
 use web_sys::{HtmlInputElement};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{Entreprise, Activities, FormActivities, ActivitiesMsg};
+use crate::modals::{Entreprise, Activities, FormActivities, ActivitiesMsg};
 
 impl Component for FormActivities {
     type Message = ActivitiesMsg;

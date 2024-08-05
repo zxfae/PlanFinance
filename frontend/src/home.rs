@@ -3,7 +3,8 @@ use yew_router::prelude::*;
 use web_sys::HtmlInputElement;
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{HomeMsg, User, FormHome};
+use crate::modals::{HomeMsg, User, FormHome};
+
 
 
 impl Component for FormHome {
@@ -17,6 +18,8 @@ impl Component for FormHome {
             submitted: false,
         }
     }
+
+
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {

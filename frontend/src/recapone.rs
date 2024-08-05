@@ -2,7 +2,7 @@ use yew::prelude::*;
 use web_sys::{HtmlCanvasElement};
 use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
-use crate::utils::{Entreprise, User, Activities};
+use crate::modals::{Entreprise, User, Activities};
 use plotters::prelude::*;
 use plotters::style::full_palette::{GREY_A700, ORANGE_100, ORANGE_200, ORANGE_50, ORANGE_500};
 use plotters_canvas::CanvasBackend;

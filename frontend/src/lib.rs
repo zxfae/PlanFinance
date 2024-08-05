@@ -1,15 +1,16 @@
 mod home;
 mod next;
 mod stepone;
-mod recapone;
+
 mod utils;
+mod recapone;
 mod modals;
 
 use yew::prelude::*;
 use yew_router::prelude::*;
 use wasm_bindgen::prelude::*;
 use crate::recapone::RecapOne;
-use crate::utils::{FormHome, FormActivities, FormEntreprise};
+use crate::modals::{FormHome, FormActivities, FormEntreprise};
 
 //Handling routes
 #[derive(Routable, PartialEq, Clone, Debug)]

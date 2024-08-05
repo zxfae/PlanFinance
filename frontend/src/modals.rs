@@ -1,24 +1,183 @@
-use regex::Regex;
+use serde::{Serialize, Deserialize};
 
-//Rust.doc (-) currentFormat
-pub fn date_test(date: &str) -> bool {
-    let date_regex = Regex::new(r"^\d{2}-\d{2}-\d{4}$").unwrap();
-    date_regex.is_match(date)
+//Struct, HomeMsg, FormHome for HomePage
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct User {
+    pub id: i32,
+    pub lastname: String,
+    pub firstname: String,
+}
+pub enum HomeMsg {
+    UpdateLastName(String),
+    UpdateFirstName(String),
+    Submit,
+    SubmissionComplete(User),
 }
 
-pub fn auto_distribute(total: i32) -> (i8, i8, i8, i8, i8, i8, i8, i8, i8, i8, i8, i8) {
-    let mut distribution = (total / 12) as i8;
-    let mut modulo = (total % 12) as i8;
+pub struct FormHome {
+    pub last_name: String,
+    pub first_name: String,
+    pub submitted: bool,
+}
 
-    let mut months = [distribution; 12];
+//Struct && EntrepriseMsg for nextPage
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Entreprise {
+    pub id: i32,
+    pub user_id: i32,
+    pub name: String,
+    pub date: String,
+    pub codeape: String,
+    pub status: String,
+    pub jrsttx: i32,
+    pub jrsweek: i16,
+    pub jrsferies: i8,
+    pub jrscp: i8,
+    pub jan: i8,
+    pub fev: i8,
+    pub mar: i8,
+    pub avr: i8,
+    pub mai: i8,
+    pub juin: i8,
+    pub jui: i8,
+    pub aout: i8,
+    pub sept: i8,
+    pub oct: i8,
+    pub nov: i8,
+    pub dec: i8,
+}
 
-    for i in 0.. modulo {
-        months[i as usize] += 1;
-    }
+pub enum EntrepriseMsg {
+    UpdateName(String),
+    UpdateDate(String),
+    UpdateCodeApe(String),
+    UpdateStatus(String),
+    UpdateJrsTTX(i32),
+    UpdateJrsWeek(i16),
+    UpdateJrsFeries(i8),
+    UpdateJrsCp(i8),
+    UpdateJan(i8),
+    UpdateFev(i8),
+    UpdateMar(i8),
+    UpdateAvr(i8),
+    UpdateMai(i8),
+    UpdateJuin(i8),
+    UpdateJui(i8),
+    UpdateAout(i8),
+    UpdateSept(i8),
+    UpdateOct(i8),
+    UpdateNov(i8),
+    UpdateDec(i8),
+    CalculateDecompte,
+    CalculateTotal,
+    AutoDistribution,
+    Submit,
+    SubmissionComplete(Entreprise),
+}
 
-    (
-        months[0], months[1], months[2], months[3], months[4],
-        months[5], months[6], months[7], months[8], months[9],
-        months[10], months[11]
-    )
+pub struct FormEntreprise {
+    pub user_id: i32,
+    pub name: String,
+    pub date: String,
+    pub codeape: String,
+    pub status: String,
+    pub jrsttx: i32,
+    pub jrsweek: i16,
+    pub jrsferies: i8,
+    pub jrscp: i8,
+    pub jan: i8,
+    pub fev: i8,
+    pub mar: i8,
+    pub avr: i8,
+    pub mai: i8,
+    pub juin: i8,
+    pub jui: i8,
+    pub aout: i8,
+    pub sept: i8,
+    pub oct: i8,
+    pub nov: i8,
+    pub dec: i8,
+    pub submitted: bool,
+    pub current_step: usize,
+    pub decompte: i32,
+    pub total: i32,
+    pub error_msg: Option<String>,
+    pub date_err:Option<String>,
+    pub oth_err: Option<String>,
+    pub err_status: Option<String>,
+}
+
+//Struct && ActivitiesMsg for stepone.rs
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Activities {
+    pub id: i32,
+    pub user_id: i32,
+    pub production: i32,
+    pub entretien: i32,
+    pub clientele: i32,
+    pub interprofession: i32,
+    pub formation: i32,
+    pub prodjour: i64,
+    pub tva: f32,
+    pub moyprix: f64,
+    pub donttva: f64,
+    pub totalservice: i64,
+    pub totalmoyprix: f64,
+    pub htcanann: f64,
+    pub tvaann: f64,
+    pub ttcann: f64,
+    pub htjours: f64,
+}
+
+pub enum ActivitiesMsg {
+    UpdateProduction(i32),
+    UpdateEntretien(i32),
+    UpdateClientele(i32),
+    UpdateInterprofession(i32),
+    UpdateFormation(i32),
+    UpdateProdjour(i64),
+    UpdateTva(f32),
+    UpdateMoyPrix(f64),
+    CalculatePouJTTX,
+    CalculePourNon,
+    CalculateTotalS1,
+    UpdateTotalService,
+    CalculateDontTva,
+    CalculateMoyTtTva,
+    CalculateCaAnnHt,
+    CalculcateTvaAnn,
+    CalculateTtcAnn,
+    CalculateHtJours,
+    Submit,
+    SubmissionComplete(Activities),
+    LoadEntreprise(Entreprise),
+    LoadEntrepriseError,
+}
+
+pub struct FormActivities {
+    pub user_id: Option<i32>,
+    pub production: i32,
+    pub entretien: i32,
+    pub clientele: i32,
+    pub interprofession: i32,
+    pub formation: i32,
+    pub prodjour: i64,
+    pub tva: f32,
+    pub moyprix: f64,
+    pub entreprise: Option<Entreprise>,
+    pub clone_jrsttx: Option<i32>,
+    pub pourcentagejrsent: f32,
+    pub pourcetagenon: f32,
+    pub totalservice: i64,
+    pub donttva: f64,
+    pub totalmoyprix: f64,
+    pub htcanann: f64,
+    pub tvaann: f64,
+    pub ttcann: f64,
+    pub htjours: f64,
+    pub error_percent: Option<String>,
+    pub error_tva: Option<String>,
+    pub error_totalstep1: Option<String>,
+    pub total: i32,
+    pub submitted: bool,
 }

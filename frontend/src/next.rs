@@ -343,7 +343,7 @@ impl FormEntreprise {
                     <div class="mb-10 text-center text-gray-600 text-4xl font-semibold">
                         <h1>{ "Étape 1" }</h1>
                         <div class="mb-3 text-center text-gray-600 text-2xl font-semibold m-2">
-                            <h1>{ "Afin de commencer votre simulation, veuillez renseigner votre future situation :" }</h1>
+                            <h1>{ "Veuillez renseigner votre future situation :" }</h1>
                         </div>
                     </div>
                     <form class="border-solid border-2 border-orange-400 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] rounded-lg px-8 pt-6 pb-8 mb-4" onsubmit={ctx.link().callback(|e: SubmitEvent| {
@@ -393,7 +393,8 @@ impl FormEntreprise {
                         }
                         </div>
                         <div class="mb-6">
-                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="codeape">{ "Code APE" }</label>
+                            <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="codeape">{ "Code APE *" }</label>
+                            <a href="https://entreprendre.service-public.fr/vosdroits/F33050" class="text-red-500 text-sm text-center mb-2 font-semibold">{"*Plus d'informations"}</a>
                             <input
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-700"
                                 id="codeape"
@@ -426,6 +427,7 @@ impl FormEntreprise {
                                         <option value="SARL">{ "Société Responsabilité Limitée (SARL)" }</option>
                                         <option value="SASU">{ "Société Actions Simplifiée Unipersonnelle (SASU)" }</option>
                                         <option value="SAS">{ "Société Actions Simplifiée (SAS)" }</option>
+                                        <option value="NULL">{ "Choisissez votre statut d'entreprise" }</option>
                                     </select>
                                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>

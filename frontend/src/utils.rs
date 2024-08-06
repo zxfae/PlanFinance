@@ -24,4 +24,3 @@ pub fn auto_distribute(total: i32) -> (i8, i8, i8, i8, i8, i8, i8, i8, i8, i8, i
         months[10], months[11]
     )
 }
-

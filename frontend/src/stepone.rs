@@ -367,7 +367,7 @@ impl Component for FormActivities {
                                 />
                             </td>
                             <td class="border-solid border-2 bg-white/50 text-right text-zinc-600 text-base font-semibold px-4 py-2">{ self.production }</td>
-                            <td class="border-solid border-2 text-zinc-600 text-base font-semibold px-4 py-2">{ format!("{:.2}%", self.pourcentagejrsent) }</td>
+                            <td>{""}</td>
                         </tr>
                         <tr>
                             <td class="border-solid border-2 bg-white text-zinc-600 text-base font-semibold px-4 py-2">{ "Rentrée d'argent positive" }</td>

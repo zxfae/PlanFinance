@@ -4,7 +4,7 @@ use web_sys::{HtmlInputElement};
 use web_sys::HtmlSelectElement;
 use reqwasm::http::Request;
 use web_sys::console;
-use crate::{AppRoute, header, footer};
+use crate::{AppRoute, header, footer,navbar};
 use crate::modals::{Entreprise, EntrepriseMsg, FormEntreprise};
 use crate::utils::{auto_distribute, date_test};
 
@@ -13,6 +13,81 @@ impl Component for FormEntreprise {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
+        let window = web_sys::window().unwrap();
+        let local_storage = window.local_storage().unwrap().unwrap();
+        let name = local_storage.get_item("name").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+        let date = local_storage.get_item("date").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+        let codeape = local_storage.get_item("codeape").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+        let status = local_storage.get_item("status").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+        let jrsttx = match local_storage.get_item("jrsttx") {
+            Ok(Some(val)) => val.parse::<i32>().unwrap_or_default(),
+            _ => 0,
+        };
+        let jrsferies = match local_storage.get_item("jrsferies") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let jrsweek = match local_storage.get_item("jrsweek") {
+            Ok(Some(val)) => val.parse::<i16>().unwrap_or_default(),
+            _ => 0,
+        };
+        let jrscp = match local_storage.get_item("jrscp") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let jan = match local_storage.get_item("jan") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let fev = match local_storage.get_item("fev") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let mar = match local_storage.get_item("mar") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let avr = match local_storage.get_item("avr") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let mai = match local_storage.get_item("mai") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let juin = match local_storage.get_item("juin") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let jui = match local_storage.get_item("jui") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let aout = match local_storage.get_item("aout") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let sept = match local_storage.get_item("sept") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let oct = match local_storage.get_item("oct") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let nov = match local_storage.get_item("nov") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+        let dec = match local_storage.get_item("dec") {
+            Ok(Some(val)) => val.parse::<i8>().unwrap_or_default(),
+            _ => 0,
+        };
+
+        let submitted = local_storage.get_item("form_submitted")
+            .unwrap_or_else(|_| Some(String::new()))
+            .unwrap_or_default() == "true";
+
         let user_id = match web_sys::window()
             .unwrap()
             .local_storage()
@@ -31,28 +106,28 @@ impl Component for FormEntreprise {
 
         Self {
             user_id,
-            name: String::new(),
-            date: String::new(),
-            codeape: String::new(),
-            status: String::from("NULL"),
-            jrsttx: 0,
-            jrsweek: 0,
-            jrsferies: 0,
-            jrscp: 0,
-            jan: 0,
-            fev: 0,
-            mar: 0,
-            avr: 0,
-            mai: 0,
-            juin: 0,
-            jui: 0,
-            aout: 0,
-            sept: 0,
-            oct: 0,
-            nov: 0,
-            dec: 0,
+            name,
+            date,
+            codeape,
+            status,
+            jrsttx,
+            jrsweek,
+            jrsferies,
+            jrscp,
+            jan,
+            fev,
+            mar,
+            avr,
+            mai,
+            juin,
+            jui,
+            aout,
+            sept,
+            oct,
+            nov,
+            dec,
             submitted: false,
-            current_step: 1,
+            current_step: if submitted { 3 } else { 1 },
             decompte: 0,
             total: 0,
             error_msg: None,
@@ -63,100 +138,123 @@ impl Component for FormEntreprise {
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let window = web_sys::window().unwrap();
+        let local_storage = window.local_storage().unwrap().unwrap();
         match msg {
+
             EntrepriseMsg::UpdateName(value) => {
-                self.name = value;
+                self.name = value.clone();
+                local_storage.set_item("name", &value).unwrap();
                 true
             }
             EntrepriseMsg::UpdateDate(value) => {
-                self.date = value;
+                self.date = value.clone();
+                local_storage.set_item("date", &value).unwrap();
                 true
             }
             EntrepriseMsg::UpdateCodeApe(value) => {
-                self.codeape = value;
+                self.codeape = value.clone();
+                local_storage.set_item("codeape", &value).unwrap();
                 true
             }
             EntrepriseMsg::UpdateStatus(value) => {
-                self.status = value;
+                self.status = value.clone();
+                local_storage.set_item("status", &value).unwrap();
                 true
             }
             EntrepriseMsg::UpdateJrsTTX(value) => {
                 self.jrsttx = value;
+                local_storage.set_item("jrsttx", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateJrsWeek(value) => {
                 self.jrsweek = value;
+                local_storage.set_item("jrsweek", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
             EntrepriseMsg::UpdateJrsFeries(value) => {
                 self.jrsferies = value;
+                local_storage.set_item("jrsferies", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
             EntrepriseMsg::UpdateJrsCp(value) => {
                 self.jrscp = value;
+                local_storage.set_item("jrscp", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateDecompte);
                 true
             }
             EntrepriseMsg::UpdateJan(value) => {
                 self.jan = value;
+                local_storage.set_item("jan", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateFev(value) => {
                 self.fev = value;
+                local_storage.set_item("fev", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateMar(value) => {
                 self.mar = value;
+                local_storage.set_item("mar", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateAvr(value) => {
                 self.avr = value;
+                local_storage.set_item("avr", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateMai(value) => {
                 self.mai = value;
+                local_storage.set_item("mai", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateJuin(value) => {
                 self.juin = value;
+                local_storage.set_item("juin", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateJui(value) => {
                 self.jui = value;
+                local_storage.set_item("jui", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateAout(value) => {
                 self.aout = value;
+                local_storage.set_item("aout", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateSept(value) => {
                 self.sept = value;
+                local_storage.set_item("sept", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateOct(value) => {
                 self.oct = value;
+                local_storage.set_item("oct", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateNov(value) => {
                 self.nov = value;
+                local_storage.set_item("nov", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
             EntrepriseMsg::UpdateDec(value) => {
                 self.dec = value;
+                local_storage.set_item("dec", &value.to_string()).unwrap();
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
@@ -198,6 +296,20 @@ impl Component for FormEntreprise {
                 self.oct = oct;
                 self.nov = nov;
                 self.dec = dec;
+
+                local_storage.set_item("jan", &jan.to_string()).unwrap();
+                local_storage.set_item("fev", &fev.to_string()).unwrap();
+                local_storage.set_item("mar", &mar.to_string()).unwrap();
+                local_storage.set_item("avr", &avr.to_string()).unwrap();
+                local_storage.set_item("mai", &mai.to_string()).unwrap();
+                local_storage.set_item("juin", &juin.to_string()).unwrap();
+                local_storage.set_item("jui", &jui.to_string()).unwrap();
+                local_storage.set_item("aout", &aout.to_string()).unwrap();
+                local_storage.set_item("sept", &sept.to_string()).unwrap();
+                local_storage.set_item("oct", &oct.to_string()).unwrap();
+                local_storage.set_item("nov", &nov.to_string()).unwrap();
+                local_storage.set_item("dec", &dec.to_string()).unwrap();
+
                 ctx.link().send_message(EntrepriseMsg::CalculateTotal);
                 true
             }
@@ -270,6 +382,8 @@ impl Component for FormEntreprise {
                                 }
                             });
                             self.submitted = true;
+                            local_storage.set_item("form_submitted", "true").unwrap();
+                            self.current_step = 3;
                             true
                         }
                     }
@@ -292,36 +406,51 @@ impl Component for FormEntreprise {
                 <div class="flex flex-col min-h-screen">
                     { header() }
                     <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                            {navbar()}
                         <div class="flex flex-row w-full justify-center">
                             {
-                                match self.current_step {
-                                    1 => self.render_step1(ctx, false),
-                                    2 => html! {
-                                        <>
-                                            <div class="mr-8">
-                                                { self.render_step1(ctx, true) }
-                                            </div>
-                                            <div>
-                                                { self.render_step2(ctx, false) }
-                                            </div>
-                                        </>
-                                    },
-                                    3 => html! {
-                                        <>
-                                            <div class="mr-8">
-                                                { self.render_step1(ctx, true) }
-                                            </div>
-                                            <div class="mr-8">
-                                                { self.render_step2(ctx, true) }
-                                            </div>
-                                            <div>
-                                                { self.render_step3(ctx, false) }
-                                            </div>
-                                        </>
-                                    },
-                                    _ => html! {},
-                                }
+                        if self.submitted {
+                            html! {
+                                <>
+                                    { self.render_step1(ctx, true) }
+                                    <div class="mr-8">
+                                        { self.render_step2(ctx, true) }
+                                    </div>
+                                    <div class="mr-8">
+                                        { self.render_step3(ctx, false) }
+                                    </div>
+                                </>
                             }
+                        } else {
+                            match self.current_step {
+                                1 => self.render_step1(ctx, false),
+                                2 => html! {
+                                    <>
+                                        <div class="mr-8">
+                                            { self.render_step1(ctx, true) }
+                                        </div>
+                                        <div>
+                                            { self.render_step2(ctx, false) }
+                                        </div>
+                                    </>
+                                },
+                                3 => html! {
+                                    <>
+                                        <div class="mr-8">
+                                            { self.render_step1(ctx, true) }
+                                        </div>
+                                        <div class="mr-8">
+                                            { self.render_step2(ctx, true) }
+                                        </div>
+                                        <div>
+                                            { self.render_step3(ctx, false) }
+                                        </div>
+                                    </>
+                                },
+                                _ => html! {},
+                            }
+                        }
+                    }
                         </div>
                     </div>
                     { footer() }
@@ -409,30 +538,81 @@ impl FormEntreprise {
                             />
                         </div>
                         <div class="mb-6">
-                                <label class="block text-orange-500 text-m text-center font-semibold mb-2" for="status">{ "Statut" }</label>
-                                <div class="relative inline-block w-full">
-                                    <select
-                                        class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-                                        id="status"
-                                        value={self.status.clone()}
+                        <label class="block text-orange-500 text-m text-center font-semibold mb-2">{ "Statut" }</label>
+                        <div class="relative inline-block w-full">
+                            <div class="flex flex-col">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" class="form-radio" name="status" value="MC"
+                                        checked={self.status == "MC"}
                                         onchange={ctx.link().callback(|e: Event| {
-                                            let input: HtmlSelectElement = e.target_unchecked_into();
+                                            let input: HtmlInputElement = e.target_unchecked_into();
                                             EntrepriseMsg::UpdateStatus(input.value())
                                         })}
-                                    >
-
-                                        <option value="MC">{ "Micro Entreprise (MC)" }</option>
-                                        <option value="EI">{ "Entreprise Individuelle (EI)" }</option>
-                                        <option value="EIRL">{ "Entreprise Individuelle Responsabilité Limitée (EIRL)" }</option>
-                                        <option value="SARL">{ "Société Responsabilité Limitée (SARL)" }</option>
-                                        <option value="SASU">{ "Société Actions Simplifiée Unipersonnelle (SASU)" }</option>
-                                        <option value="SAS">{ "Société Actions Simplifiée (SAS)" }</option>
-                                        <option value="NULL">{ "Choisissez votre statut d'entreprise" }</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 12l-5-5h10l-5 5z"/></svg>
-                                    </div>
-                                </div>
+                                    />
+                                    <span class="ml-2">{ "Micro Entreprise (MC)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="EI"
+                                        checked={self.status == "EI"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Entreprise Individuelle (EI)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="EIRL"
+                                        checked={self.status == "EIRL"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Entreprise Individuelle Responsabilité Limitée (EIRL)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="SARL"
+                                        checked={self.status == "SARL"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Société Responsabilité Limitée (SARL)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="SASU"
+                                        checked={self.status == "SASU"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Société Actions Simplifiée Unipersonnelle (SASU)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="SAS"
+                                        checked={self.status == "SAS"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Société Actions Simplifiée (SAS)" }</span>
+                                </label>
+                                <label class="inline-flex items-center mt-2">
+                                    <input type="radio" class="form-radio" name="status" value="NULL"
+                                        checked={self.status == "NULL"}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let input: HtmlInputElement = e.target_unchecked_into();
+                                            EntrepriseMsg::UpdateStatus(input.value())
+                                        })}
+                                    />
+                                    <span class="ml-2">{ "Choisissez votre statut d'entreprise" }</span>
+                                </label>
+                            </div>
+                        </div>
                                 <div>
                                 {
                                     if let Some(ref message) = self.err_status{

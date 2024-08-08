@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use web_sys::{HtmlInputElement};
 use reqwasm::http::Request;
-use crate::{AppRoute, header, footer};
+use crate::{AppRoute, header, footer, navbar};
 use crate::modals::{Entreprise, Activities, FormActivities, ActivitiesMsg};
 
 impl Component for FormActivities {
@@ -333,6 +333,7 @@ impl Component for FormActivities {
         <div class="flex flex-col min-h-screen">
             { header() }
             <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                {navbar()}
                 <div class="drop-shadow-md text-center text-gray-600 text-2xl font-semibold m-5">
                     <h1>{ "Répartition Temps de Travail / d'activité" }</h1>
                     <div class="text-center text-gray-600 text-2xl font-semibold m-2">

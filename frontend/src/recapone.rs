@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use web_sys::{HtmlCanvasElement};
 use reqwasm::http::Request;
-use crate::{AppRoute, header, footer};
+use crate::{AppRoute, header, footer, navbar};
 use crate::modals::{Entreprise, User, Activities};
 use plotters::prelude::*;
 use plotters::style::full_palette::{GREY_A700, ORANGE_100, ORANGE_200, ORANGE_50, ORANGE_500};
@@ -135,6 +135,7 @@ impl Component for RecapOne {
                 <div class="flex flex-col min-h-screen">
                 {header()}
                 <div class="bg-orange-50 flex flex-col flex-grow justify-center items-center">
+                {navbar()}
                     <div class="flex flex-row w-full justify-center">
                         <h1>{format!("donnees de l'entreprise {}", entreprise.name)}</h1>
                         {self.view_activites()}

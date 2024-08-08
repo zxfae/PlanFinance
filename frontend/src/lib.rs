@@ -1,7 +1,6 @@
 mod home;
 mod next;
 mod stepone;
-
 mod utils;
 mod recapone;
 mod modals;
@@ -29,6 +28,8 @@ enum AppRoute {
 fn app() -> Html {
     html! {
         <BrowserRouter>
+            //navbar
+            <navbar/>
             <Switch<AppRoute> render={switch} />
         </BrowserRouter>
     }
@@ -36,9 +37,13 @@ fn app() -> Html {
 
 fn switch(routes: AppRoute) -> Html {
     match routes {
+        //1
         AppRoute::Home => html! { <FormHome /> },
+        //2
         AppRoute::FormEntreprise => html! { <FormEntreprise /> },
+        //3
         AppRoute::StepTwo => html! { <FormActivities /> },
+        //4
         AppRoute::RecapOne => html! {< RecapOne/>},
     }
 }
@@ -71,5 +76,29 @@ fn footer() -> Html {
         <footer class="border-solid border-t-2 border-orange-400 w-full text-center py-6 bg-zinc-50">
             <h1 class="text-3xl font-serif text-gray-900 mb-2">{ title }</h1>
         </footer>
+    }
+}
+fn navbar() -> Html {
+    html! {
+        <nav class="bg-orange-50">
+            <div class="max-w-screen-xl flex flex-wrap items-center justify-between">
+                <div class="w-full md:block md:w-auto" id="navbar-default">
+                    <ul class="font-medium flex flex-row space-x-8 border border-gray-100 rounded-lg bg-gray-50">
+                        <li>
+                            <Link<AppRoute> to={AppRoute::Home} classes="block py-2 px-3 text-gray-900 text-2xl rounded">{"Home"}</Link<AppRoute>>
+                        </li>
+                        <li>
+                            <Link<AppRoute> to={AppRoute::FormEntreprise} classes="block py-2 px-3 text-gray-900 text-2xl rounded">{"Entreprise"}</Link<AppRoute>>
+                        </li>
+                        <li>
+                            <Link<AppRoute> to={AppRoute::StepTwo} classes="block py-2 px-3 text-gray-900 text-2xl rounded">{"Activities"}</Link<AppRoute>>
+                        </li>
+                        <li>
+                            <Link<AppRoute> to={AppRoute::RecapOne} classes="block py-2 px-3 text-gray-900 text-2xl rounded">{"Recap"}</Link<AppRoute>>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     }
 }

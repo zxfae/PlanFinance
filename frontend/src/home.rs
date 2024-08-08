@@ -5,30 +5,38 @@ use reqwasm::http::Request;
 use crate::{AppRoute, header, footer};
 use crate::modals::{HomeMsg, User, FormHome};
 
-
-
 impl Component for FormHome {
     type Message = HomeMsg;
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
+        let window = web_sys::window().unwrap();
+        let local_storage = window.local_storage().unwrap().unwrap();
+        //localstorage activation, necessary to save state
+        let last_name = local_storage.get_item("last_name").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+        let first_name = local_storage.get_item("first_name").unwrap_or_else(|_| Some(String::new())).unwrap_or_default();
+
         Self {
-            last_name: String::new(),
-            first_name: String::new(),
+            last_name,
+            first_name,
             submitted: false,
         }
     }
 
-
-
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let window = web_sys::window().unwrap();
+        let local_storage = window.local_storage().unwrap().unwrap();
         match msg {
             HomeMsg::UpdateLastName(value) => {
-                self.last_name = value;
+                self.last_name = value.clone();
+                //Set new value
+                local_storage.set_item("last_name", &value).unwrap();
                 true
             }
             HomeMsg::UpdateFirstName(value) => {
-                self.first_name = value;
+                self.first_name = value.clone();
+                //set new value
+                local_storage.set_item("first_name", &value).unwrap();
                 true
             }
             HomeMsg::Submit => {
@@ -63,13 +71,9 @@ impl Component for FormHome {
             }
             HomeMsg::SubmissionComplete(new_user) => {
                 log::info!("Submission completed.");
-                web_sys::window()
-                    .unwrap()
-                    .local_storage()
-                    .unwrap()
-                    .unwrap()
-                    .set_item("user_id", &new_user.id.to_string())
-                    .unwrap();
+                let window = web_sys::window().unwrap();
+                let local_storage = window.local_storage().unwrap().unwrap();
+                local_storage.set_item("user_id", &new_user.id.to_string()).unwrap();
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::FormEntreprise);
                 true

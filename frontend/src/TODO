@@ -1,3 +1,4 @@
-backend next.rs
-perform distribution algorithm
-add distrib auto step 2, regex date 365 or 366
+next.rs
+// double enregistrement dans la DB
+//JSON localstorage
+//radio button css
